@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Simulador de bordado - Chef Works Chile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&family=Playfair+Display:wght@700&family=Dancing+Script:wght@700&family=Pacifico&family=Oswald:wght@600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f4f2; --panel:#ffffff; --ink:#141414; --muted:#5c5c5c;
+    --brand:#c11f2a; --brand2:#141414; --line:#e0e0dd;
+    --shadow:0 10px 28px rgba(0,0,0,.08); --radius:4px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color:var(--ink);
+    background: radial-gradient(circle at top right, rgba(193,31,42,.05), transparent 30%), var(--bg);
+  }
+  .wrap{max-width:1440px; margin:0 auto; padding:24px;}
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;
+    background:rgba(255,255,255,.8); backdrop-filter: blur(10px);
+    border:1px solid rgba(255,255,255,.9); box-shadow:var(--shadow);
+    padding:16px 20px; border-radius:2px; position:sticky; top:12px; z-index:10;
+  }
+  .brand{display:flex; align-items:center; gap:12px}
+  .mark{height:42px; width:auto; max-width:120px; object-fit:contain; display:block}
+  .title h1{margin:0;font-size:17px}
+  .title p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+  .badge{font-size:11px; background:var(--ink); color:#fff; padding:5px 10px; border-radius:2px; font-weight:700; letter-spacing:.04em; text-transform:uppercase}
+  .grid{margin-top:16px; display:grid; grid-template-columns: 330px minmax(320px,1fr) 380px; gap:16px; align-items:start}
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden}
+  .panel .head{padding:14px 16px; border-bottom:1px solid var(--line); background:linear-gradient(180deg,#fff,#fafcff)}
+  .panel .head h2{margin:0;font-size:15px}
+  .panel .head span{color:var(--muted); font-size:11.5px}
+  .panel .body{padding:16px}
+  .section{margin-bottom:16px}
+  .section:last-child{margin-bottom:0}
+  .section h3{margin:0 0 8px;font-size:12px;letter-spacing:.03em;text-transform:uppercase;color:#415066}
+  label{display:block;font-size:12.5px;font-weight:700;margin-bottom:6px;color:#334155}
+  input[type=text], input[type=number], select, textarea{
+    width:100%; border:1px solid var(--line); border-radius:2px; padding:10px 12px; font:inherit; background:#fff; outline:none;
+  }
+  textarea{min-height:60px; resize:vertical}
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .products{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  .chipbar{display:flex; gap:6px; flex-wrap:wrap}
+  .chip{padding:7px 11px; border:1px solid var(--line); border-radius:999px; background:#fff; font-size:11.5px; cursor:pointer; font-weight:700; color:#415066}
+  .chip.active{border-color:var(--brand); color:var(--brand); background:rgba(193,31,42,.06)}
+  .chip.on::after{content:" ●"; color:var(--brand)}
+  .chip[disabled]{opacity:.4; cursor:not-allowed; pointer-events:none}
+  .prodCard{border:1.5px solid var(--line); border-radius:2px; padding:8px; cursor:pointer; text-align:center; background:#fff}
+  .prodCard.active{border-color:var(--brand); box-shadow:0 0 0 3px rgba(193,31,42,.12)}
+  .prodCard img{width:100%; height:78px; object-fit:cover; border-radius:10px; background:#f1f4f8}
+  .prodCard .pname{font-size:10.5px; font-weight:700; margin-top:5px; line-height:1.2}
+  .prodCard .pprice{font-size:10.5px; color:var(--brand); font-weight:800}
+  .swatches{display:flex; gap:8px; flex-wrap:wrap}
+  .swatch{width:26px;height:26px;border-radius:999px;border:3px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer}
+  .swatch.active{box-shadow:0 0 0 3px var(--brand)}
+  .small{font-size:11.5px;color:var(--muted);line-height:1.45}
+  .drop{border:1.5px dashed #c7c7c2;border-radius:2px;padding:12px;background:#fafaf8;color:var(--muted)}
+  .drop strong{color:var(--ink)}
+  .drop input[type=file]{
+    display:block; width:100%; max-width:100%; font-size:11.5px; color:var(--muted);
+    margin-top:8px;
+  }
+  .drop input[type=file]::file-selector-button{
+    border:1px solid var(--line); background:#fff; border-radius:2px; padding:7px 12px;
+    font-size:11.5px; font-weight:700; color:var(--ink); cursor:pointer; margin-right:8px;
+  }
+  .logoList{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px}
+  .logoThumb{
+    width:46px; height:46px; border-radius:10px; border:2px solid var(--line); background:#fff repeating-conic-gradient(#eef1f5 0% 25%, #fff 0% 50%) 50%/10px 10px;
+    cursor:pointer; position:relative; overflow:hidden;
+  }
+  .logoThumb img{width:100%; height:100%; object-fit:contain}
+  .logoThumb.active{border-color:var(--brand); box-shadow:0 0 0 2px rgba(193,31,42,.15)}
+  .logoThumb .delMini{position:absolute; top:-4px; right:-4px; width:16px; height:16px; border-radius:50%; background:var(--brand); color:#fff; font-size:10px; display:grid; place-items:center; line-height:1}
+  .previewWrap{padding:16px}
+  .previewStage{
+    min-height:480px;
+    background:linear-gradient(45deg, rgba(193,31,42,.04), transparent 35%), #fafafa;
+    border-radius:2px; border:1px solid var(--line); position:relative; overflow:hidden;
+  }
+  .zoomBtn{
+    position:absolute; right:16px; bottom:16px; width:42px; height:42px; border-radius:50%;
+    border:1px solid var(--line); background:#fff; box-shadow:0 6px 16px rgba(15,23,42,.18);
+    font-size:18px; cursor:pointer; display:grid; place-items:center; z-index:5;
+  }
+  .zoomBtn.active{ background:var(--brand); color:#fff; border-color:var(--brand) }
+  .mock-product.magMode .logoBox{ pointer-events:none; }
+  .magLens{
+    position:absolute; width:150px; height:150px; border-radius:50%;
+    border:3px solid var(--brand); box-shadow:0 8px 24px rgba(0,0,0,.4);
+    overflow:hidden; pointer-events:none; display:none; z-index:30; background:#f8fafc;
+  }
+  .scene{position:absolute; inset:0; display:grid; place-items:start center; padding:14px 20px 20px}
+  .mock-product{
+    width:min(400px,86%); aspect-ratio: 1/1.05; position:relative; overflow:hidden;
+    border-radius:2px; box-shadow:0 20px 30px rgba(15,23,42,.16);
+  }
+  .mock-product img.base{
+    position:absolute; left:0; top:0; width:100%; height:100%;
+    object-fit:cover; display:block;
+  }
+  .logoBox{
+    position:absolute; display:grid; place-items:center; text-align:center; padding:2px;
+    color:#111827; font-weight:900; letter-spacing:.02em; line-height:1.05; user-select:none; width:170px;
+    filter: drop-shadow(0 1px 0 rgba(255,255,255,.4)) drop-shadow(0 -1px 1px rgba(0,0,0,.25));
+    cursor:grab; touch-action:none; overflow:hidden;
+    outline:1.5px dashed transparent; outline-offset:4px; border-radius:8px;
+  }
+  .logoBox:hover{ outline-color:rgba(193,31,42,.5) }
+  .logoBox.dragging{ cursor:grabbing; outline-color:var(--brand) }
+  .logoBox.inactive{ outline-color:transparent; opacity:.55 }
+  .logoBox.editing{ outline-style:solid; outline-color:var(--brand) }
+  .logoBox.finalRender{ outline:none !important; cursor:default; }
+  .dragHint{position:absolute; right:16px; bottom:68px; background:rgba(24,34,48,.85); color:#fff; padding:7px 11px; border-radius:12px; font-size:11px; max-width:220px; text-align:right}
+  .backPlaceholder{
+    display:none; position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    background:rgba(24,34,48,.88); color:#fff; padding:8px 14px; border-radius:2px;
+    font-size:11px; text-align:center; z-index:6; white-space:nowrap;
+  }
+  .backPlaceholder span{display:block; font-size:9.5px; opacity:.75; margin-top:2px}
+  .mock-product.usingBackFallback .backPlaceholder{display:block}
+  .resizeHandle{
+    position:absolute; right:-7px; bottom:-7px; width:13px; height:13px; border-radius:3px;
+    background:#fff; border:1.5px solid var(--brand); box-shadow:0 2px 5px rgba(0,0,0,.25);
+    cursor:nwse-resize; touch-action:none;
+    opacity:0; transition:opacity .15s ease;
+  }
+  .logoBox:hover .resizeHandle,
+  .logoBox.dragging .resizeHandle,
+  .logoBox.editing .resizeHandle{ opacity:1; }
+  .zoneOverlay{
+    position:absolute; border:1.5px dashed rgba(20,20,20,.35); border-radius:4px;
+    background:rgba(20,20,20,.03); pointer-events:none;
+  }
+  .zoneOverlay.editingZone{ border-color:rgba(193,31,42,.55); background:rgba(193,31,42,.05) }
+  .mock-product.darkGarment .zoneOverlay:not(.editingZone){
+    border-color:rgba(255,255,255,.65); background:rgba(255,255,255,.06);
+  }
+  .zoneLabel{position:absolute; top:-17px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; font-size:8px; font-weight:800; padding:2px 5px; border-radius:2px; letter-spacing:.01em; white-space:nowrap; text-transform:uppercase}
+  .zoneOverlay.editingZone .zoneLabel{background:var(--brand)}
+  .logoBox .brandName{font-size:20px; text-transform:uppercase}
+  .logoBox .tag{font-size:8px; font-weight:800; letter-spacing:.18em; margin-top:3px; opacity:.75}
+  .logoBox img{max-width:100%; max-height:100%; object-fit:contain; display:none; filter: drop-shadow(0 1px 0 rgba(255,255,255,.4)) drop-shadow(0 -1px 1px rgba(0,0,0,.25))}
+  .logoTint{position:absolute; inset:0; mix-blend-mode:color; opacity:0; pointer-events:none}
+  .note{position:absolute; left:16px; bottom:16px; background:rgba(255,255,255,.9); border:1px solid var(--line); padding:8px 11px; border-radius:12px; font-size:11.5px; color:var(--muted); max-width:60%}
+  .btn{border:0;border-radius:2px;padding:11px 14px;font-weight:700;cursor:pointer;background:#ececea;color:var(--ink);text-transform:uppercase;font-size:12.5px;letter-spacing:.03em}
+  .btn.primary{background:var(--brand);color:#fff}
+  .btn.green{background:var(--brand2);color:#fff}
+  .btn.block{width:100%}
+  .actions{display:flex; gap:8px; flex-wrap:wrap}
+  .toggle{display:flex; align-items:center; gap:8px; font-size:12.5px; color:#334155; font-weight:600}
+  .priceBox{border:1px solid var(--line); border-radius:2px; padding:12px; background:#fafaf8}
+  .priceRow{display:flex; justify-content:space-between; font-size:12.5px; padding:4px 0; color:var(--muted)}
+  .priceRow.total{color:var(--ink); font-weight:800; font-size:14px; border-top:1px dashed var(--line); margin-top:6px; padding-top:8px}
+  .warn{background:rgba(193,31,42,.06); border:1px solid rgba(193,31,42,.25); color:#7a1420; padding:9px 11px; border-radius:12px; font-size:11.5px}
+
+  .confirmPage{
+    display:none; position:fixed; inset:0; background:var(--bg); z-index:100;
+    align-items:center; justify-content:center; padding:24px;
+  }
+  .confirmPage.show{display:flex}
+  .confirmCard{
+    background:#fff; border:1px solid var(--line); border-radius:2px; box-shadow:var(--shadow);
+    padding:48px 40px; max-width:440px; width:100%; text-align:center;
+  }
+  .confirmIconBig{
+    width:64px; height:64px; border-radius:50%; background:#1f8a3d; color:#fff;
+    display:grid; place-items:center; font-size:32px; font-weight:800; margin:0 auto 18px;
+  }
+  .confirmCard h2{margin:0 0 8px; font-size:22px}
+  .confirmSub{color:var(--muted); font-size:13px; line-height:1.5; margin:0 0 22px}
+  .confirmOrderBig{
+    background:#f4f4f2; border:1px solid var(--line); border-radius:2px; padding:14px;
+    font-size:12px; color:var(--muted); line-height:1.6;
+  }
+  .confirmOrderBig span{display:block; font-family:monospace; font-size:17px; font-weight:800; color:var(--ink); margin-top:2px}
+  pre{background:#0f172a; color:#c7d6ef; padding:12px; border-radius:12px; font-size:10.5px; overflow:auto; max-height:240px}
+  .repoTable{width:100%; border-collapse:collapse; font-size:12px}
+  .repoTable th{text-align:left; padding:8px 10px; border-bottom:2px solid var(--ink); font-size:10.5px; text-transform:uppercase; letter-spacing:.03em; color:var(--muted)}
+  .repoTable td{padding:8px 10px; border-bottom:1px solid var(--line)}
+  .repoTable tr:hover td{background:#fafaf8}
+  .repoEmpty{padding:24px; text-align:center; color:var(--muted)}
+  @media (max-width:1150px){ .grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <img class="mark" src="https://images.jumpseller.com/store/chefworks/store/logo/footerLogo.png?1677256838" alt="Chef Works Chile" />
+      <div class="title">
+        <h1>Simulador de bordado — Chef Works Chile</h1>
+        <p>Prototipo v3 · múltiples zonas de bordado (pecho + mangas)</p>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px">
+      <div class="badge">Datos cargados desde chefworks.cl</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT: config -->
+    <aside class="panel">
+      <div class="head"><h2>1. Elige la prenda</h2><span>Modelos reales</span></div>
+      <div class="body">
+        <div class="section">
+          <input type="text" id="productSearch" placeholder="🔍 Buscar prenda..." />
+        </div>
+        <div class="section">
+          <div class="chipbar" id="categoryTabs" style="margin-top:0"></div>
+        </div>
+        <div class="section">
+          <div class="products" id="products"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER: preview -->
+    <section class="panel">
+      <div class="head"><h2>2. Vista previa en vivo</h2><span id="liveStatus">Edición activa</span></div>
+      <div class="previewWrap">
+        <div class="chipbar" id="viewTabs" style="margin-bottom:12px"></div>
+        <div class="previewStage" id="previewStage">
+          <div class="scene">
+            <div class="mock-product" id="mockProduct">
+              <img class="base" id="baseImg" src="" alt="Prenda" />
+              <div class="backPlaceholder" id="backPlaceholder">📷 Foto de espalda pendiente<br/><span>usando foto de frente como referencia</span></div>
+              <!-- overlays y logos por zona, generados dinámicamente -->
+              <div id="zonesLayer"></div>
+            </div>
+          </div>
+          <div class="note" id="noteBubble">Selecciona una zona para bordar</div>
+          <div class="dragHint">🖱️ Arrastra para posicionar · punto rojo para tamaño</div>
+          <button class="zoomBtn" id="zoomInBtn" title="Activar lupa (hover)">🔍</button>
+          <div class="magLens" id="magLens"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: personalization + spec -->
+    <aside class="panel">
+      <div class="head"><h2>3. Zonas de bordado</h2><span>Según la vista seleccionada</span></div>
+      <div class="body">
+        <div class="section">
+          <div class="chipbar" id="zoneTabs"></div>
+          <div class="small" style="margin-top:6px">Cada zona puede tener su propio texto, logo y color de hilo.</div>
+        </div>
+
+        <div id="zoneFields">
+          <div class="section" style="border:1px solid var(--line); border-radius:2px; padding:12px; background:#fafaf8">
+            <label class="toggle"><input type="checkbox" id="textEnabled"/> Bordar TEXTO en esta zona</label>
+            <div id="textFieldsInner" style="display:none; margin-top:10px">
+              <label>Nombre / marca</label>
+              <input type="text" id="brandText" placeholder="Ej: Restaurant La Mar" />
+              <label style="margin-top:10px">Color del hilo (texto)</label>
+              <div class="swatches" id="threadSwatchesText"></div>
+              <label style="margin-top:10px">Tipografía</label>
+              <select id="fontFamily">
+                <option value="'Poppins', Arial, sans-serif" style="font-family:'Poppins',sans-serif">Sans Bold (clásica)</option>
+                <option value="'Bebas Neue', Arial, sans-serif" style="font-family:'Bebas Neue',sans-serif">Condensada</option>
+                <option value="'Oswald', Arial, sans-serif" style="font-family:'Oswald',sans-serif">Angosta moderna</option>
+                <option value="'Playfair Display', Georgia, serif" style="font-family:'Playfair Display',serif">Serif elegante</option>
+                <option value="Georgia, 'Times New Roman', serif" style="font-family:Georgia,serif">Serif clásica</option>
+                <option value="'Dancing Script', cursive" style="font-family:'Dancing Script',cursive">Cursiva / firma</option>
+                <option value="'Pacifico', cursive" style="font-family:'Pacifico',cursive">Script fina</option>
+                <option value="'Courier New', monospace" style="font-family:'Courier New',monospace">Máquina de escribir</option>
+              </select>
+              <label style="margin-top:10px">Tamaño del texto: <span id="sizeLabelText"></span></label>
+              <input type="range" id="sizeText" min="1" max="10" step="0.5" value="5" class="range" />
+            </div>
+          </div>
+
+          <div class="section" style="border:1px solid var(--line); border-radius:2px; padding:12px; background:#fafaf8">
+            <label>Logos en esta zona</label>
+            <div class="logoList" id="logoList"></div>
+            <div class="drop" style="margin-top:8px">
+              <strong>+ Agregar logo</strong> a esta zona (puedes subir varios)
+              <input type="file" id="fileInput" accept="image/*" style="margin-top:8px" />
+              <label class="toggle" style="margin-top:10px"><input type="checkbox" id="removeBg" checked/> Quitar fondo automáticamente</label>
+            </div>
+            <div id="logoEditFields" style="display:none; margin-top:10px">
+              <label>Tamaño del logo seleccionado: <span id="sizeLabelLogo"></span></label>
+              <input type="range" id="sizeLogo" min="1" max="10" step="0.5" value="5" class="range" />
+              <button class="btn block" id="btnRemoveLogo" style="margin-top:10px; background:#fde8e8; color:#7a1420">🗑️ Quitar este logo</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <label>Cantidad de prendas</label>
+          <input type="number" id="qty" min="1" value="1" />
+        </div>
+        <div class="section">
+          <label class="toggle"><input type="checkbox" id="hasMatrix"/> Chef Works ya tiene la matriz de mis logos</label>
+          <div class="small" style="margin-top:6px" id="matrixNote"></div>
+          <div class="drop" id="matrixUploadBlock" style="margin-top:10px">
+            <strong>Adjuntar matriz de bordado</strong> (opcional — .dst, .pes, .exp, .jef, .vp3, etc.)
+            <input type="file" id="matrixFileInput" accept=".dst,.pes,.exp,.jef,.vp3,.xxx,.pxf,.hus,.jef,.dsb,.emb" style="margin-top:8px" />
+            <div class="small" id="matrixFileName" style="margin-top:6px"></div>
+          </div>
+        </div>
+        <div class="section">
+          <label>Nota para bodega (opcional)</label>
+          <textarea id="notes" placeholder="Ej: usar hilo Pantone 186C para el rojo del logo"></textarea>
+        </div>
+
+        <div class="section" style="display:none">
+          <h3>Resumen del bordado</h3>
+          <div class="priceBox" id="priceBox"></div>
+        </div>
+
+        <div class="section">
+          <div class="actions">
+            <button class="btn block green" id="btnPreview">👁️ Vista previa</button>
+            <button class="btn block primary" id="btnSpec">Enviar bordado</button>
+            <button class="btn block" id="btnReset">Reiniciar</button>
+          </div>
+          <div class="warn" id="validationBanner" style="display:none; margin-top:10px"></div>
+        </div>
+
+        <div class="section">
+          <div class="warn">Plazo con bordado: hasta 15 días hábiles adicionales. Prendas bordadas no tienen cambio ni devolución.</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="confirmPage" id="confirmPage">
+  <div class="confirmCard">
+    <div class="confirmIconBig">✓</div>
+    <h2>Bordado enviado</h2>
+    <p class="confirmSub">Tu pedido quedó registrado. Guarda el número de pedido para cualquier consulta.</p>
+    <div class="confirmOrderBig">N° de pedido<br/><span id="orderNumberBig"></span></div>
+    <button class="btn" id="btnBackToEditor" style="margin-top:24px; background:none; text-decoration:underline">← Volver a personalizar</button>
+  </div>
+</div>
+
+<script>
+// ---------- Zonas de bordado por categoría de prenda ----------
+// Cada zona: rectángulo (%) donde se puede soltar/arrastrar el bordado dentro de esa zona.
+const zoneDefs = {
+  chaqueta: {
+    frente:    { view:'frente',  label:'Pecho',          xMin:23, xMax:67, yMin:14, yMax:48 },
+    mangaIzq:  { view:'frente',  label:'Manga Izq.',xMin:3,  xMax:23, yMin:17, yMax:34 },
+    mangaDer:  { view:'frente',  label:'Manga Der.',  xMin:74, xMax:94, yMin:17, yMax:34 },
+    espalda:   { view:'espalda', label:'Espalda',        xMin:15, xMax:85, yMin:12, yMax:68 }
+  },
+  camisa: {
+    frente:    { view:'frente',  label:'Pecho',          xMin:28, xMax:72, yMin:14, yMax:48 },
+    mangaIzq:  { view:'frente',  label:'Manga Izq.',xMin:6,  xMax:26, yMin:17, yMax:34 },
+    mangaDer:  { view:'frente',  label:'Manga Der.',  xMin:74, xMax:94, yMin:17, yMax:34 },
+    espalda:   { view:'espalda', label:'Espalda',        xMin:15, xMax:85, yMin:14, yMax:66 }
+  },
+  polera: {
+    frente:    { view:'frente',  label:'Pecho',          xMin:26, xMax:74, yMin:26, yMax:58 },
+    mangaIzq:  { view:'frente',  label:'Manga Izq.',xMin:6,  xMax:26, yMin:24, yMax:41 },
+    mangaDer:  { view:'frente',  label:'Manga Der.',  xMin:74, xMax:94, yMin:24, yMax:41 },
+    espalda:   { view:'espalda', label:'Espalda',        xMin:14, xMax:86, yMin:14, yMax:68 }
+  },
+  pechera: {
+    frente:    { view:'frente',  label:'Pecho',   xMin:0, xMax:100, yMin:0, yMax:100, hideOverlay:true }
+  },
+  mandil: {
+    frente:    { view:'frente',  label:'Frente',         xMin:0, xMax:100, yMin:0, yMax:100, hideOverlay:true }
+  }
+};
+
+// Devuelve las zonas de bordado para un producto, aplicando ajustes personalizados
+// (product.zoneOverride) por encima de los valores generales de su categoría.
+function zonesForProduct(product){
+  const base = zoneDefs[product.cat];
+  if(!product.zoneOverride) return base;
+  const merged = {};
+  Object.keys(base).forEach(zid=>{
+    merged[zid] = Object.assign({}, base[zid], product.zoneOverride[zid] || {});
+  });
+  return merged;
+}
+
+const products = [
+  // ==================== CHAQUETAS · más vendidas ====================
+  { id:'springfield-unisex', cat:'chaqueta', name:'Chaqueta Springfield Unisex', sku:'BCSZ009', price:40990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/67785809/thumb/760/1013?1779303446',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/67785810/thumb/760/1013?1779303446',
+    zoneOverride: {
+      frente:   { xMax:75 },
+      mangaIzq: { yMin:16, yMax:42 },
+      mangaDer: { yMin:16, yMax:42 }
+    },
+    colors:[{name:'Blanco',hex:'#f5f5f3'},{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'springfield-mujer', cat:'chaqueta', name:'Chaqueta Springfield Mujer', sku:'BCWSZ006', price:39990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/35047203/thumb/760/1013?1782140922',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/35047204/thumb/760/1013?1782140922',
+    colors:[{name:'Blanco',hex:'#f5f5f3'},{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'hartford-mujer', cat:'chaqueta', name:'Chaqueta Hartford Mujer', sku:'BCWLZ005', price:42990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/34744652/thumb/760/1013?1779140980',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/19242128/thumb/760/1013?1779140980',
+    zoneOverride: {
+      frente:   { xMin:28, xMax:72, yMin:9, yMax:43 },
+      mangaIzq: { yMin:14, yMax:40 },
+      mangaDer: { yMin:14, yMax:40 }
+    },
+    colors:[{name:'Blanco',hex:'#f5f5f3'},{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'hartford-unisex', cat:'chaqueta', name:'Chaqueta Hartford Unisex', sku:'BCLZ008', price:42990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/67444100/thumb/760/1013?1779292070',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/67444101/thumb/760/1013?1779292070',
+    zoneOverride: {
+      frente:   { xMin:28, xMax:72, yMin:9, yMax:43 },
+      mangaIzq: { yMin:14, yMax:40 },
+      mangaDer: { yMin:14, yMax:40 }
+    },
+    colors:[{name:'Blanco',hex:'#f5f5f3'},{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'valais-unisex', cat:'chaqueta', name:'Chaqueta Valais Unisex', sku:'VSSS', price:37990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/35048235/thumb/760/1013?1778891898',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/35048234/thumb/760/1013?1778891898',
+    dark:true,
+    zoneOverride: {
+      frente:   { xMin:29, xMax:73 },
+      mangaIzq: { yMin:18, yMax:49 },
+      mangaDer: { yMin:18, yMax:49 }
+    },
+    colors:[{name:'Blanco',hex:'#f5f5f3'},{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'bowden-unisex', cat:'chaqueta', name:'Chaqueta Bowden Unisex', sku:'CBC01', price:49990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/76831309/thumb/760/1013?1779808612',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/76831310/thumb/760/1013?1779808612',
+    dark:true,
+    zoneOverride: {
+      frente:   { xMin:32, xMax:76 },
+      mangaIzq: { xMin:9,  xMax:31, yMin:15, yMax:47 },
+      mangaDer: { xMin:78, xMax:98, yMin:15, yMax:47 }
+    },
+    colors:[{name:'Blanco',hex:'#f5f5f3'},{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'bastille-unisex', cat:'chaqueta', name:'Chaqueta Bastille Unisex', sku:'BAST-BLK', price:27990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/67439506/thumb/760/1013?1782330176',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/67439509/thumb/760/1013?1782330176',
+    zoneOverride: {
+      frente:   { xMin:32, xMax:76 },
+      mangaIzq: { xMin:9,  xMax:31, yMin:15, yMax:47 },
+      mangaDer: { xMin:78, xMax:98, yMin:15, yMax:47 }
+    },
+    colors:[{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'lemans-unisex', cat:'chaqueta', name:'Chaqueta Le Mans Unisex', sku:'WCCW-WHT', price:28990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/35056510/thumb/760/1013?1782146775',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/35056508/thumb/760/1013?1782146775',
+    zoneOverride: {
+      frente:   { xMin:36, xMax:74 },
+      mangaIzq: { xMin:11, xMax:31, yMin:16, yMax:48 },
+      mangaDer: { xMin:77, xMax:97, yMin:16, yMax:48 }
+    },
+    colors:[{name:'Blanco',hex:'#f5f5f3'}] },
+  { id:'bordeaux-unisex', cat:'chaqueta', name:'Chaqueta Bordeaux Unisex', sku:'PKWC', price:41990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/31675126/thumb/760/1013?1675883906',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/31675125/thumb/760/1013?1675883906',
+    dark:false,
+    zoneOverride: {
+      frente:   { xMin:32, xMax:76 },
+      mangaIzq: { xMin:9,  xMax:31, yMin:15, yMax:47 },
+      mangaDer: { xMin:78, xMax:98, yMin:15, yMax:47 }
+    },
+    colors:[{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'lyon-unisex', cat:'chaqueta', name:'Chaqueta Lyon Unisex', sku:'EWCC-WHT', price:50990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/67443667/thumb/760/1013?1781212173',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/67443665/thumb/760/1013?1781212173',
+    zoneOverride: {
+      frente:   { xMin:32, xMax:76 },
+      mangaIzq: { xMin:9,  xMax:31, yMin:15, yMax:47 },
+      mangaDer: { xMin:78, xMax:98, yMin:15, yMax:47 }
+    },
+    colors:[{name:'Blanco',hex:'#f5f5f3'}] },
+  { id:'tulum-unisex', cat:'chaqueta', name:'Chaqueta Tulum Unisex', sku:'CBS01', price:59990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/36386567/thumb/760/1013?1780576587',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/36386566/thumb/760/1013?1780576587',
+    zoneOverride: {
+      frente:   { xMin:32, xMax:76 },
+      mangaIzq: { xMin:9,  xMax:31, yMin:15, yMax:47 },
+      mangaDer: { xMin:78, xMax:98, yMin:15, yMax:47 }
+    },
+    colors:[{name:'Blanco',hex:'#f5f5f3'}] },
+  { id:'nepal-unisex', cat:'chaqueta', name:'Chaqueta Nepal Unisex', sku:'CBZ02', price:60990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/76674273/thumb/760/1013?1778894090',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/76674274/thumb/760/1013?1778894090',
+    zoneOverride: {
+      frente:   { xMin:32, xMax:76 },
+      mangaIzq: { xMin:9,  xMax:31, yMin:15, yMax:47 },
+      mangaDer: { xMin:78, xMax:98, yMin:15, yMax:47 }
+    },
+    colors:[{name:'Blanco',hex:'#f5f5f3'},{name:'Negro',hex:'#1a1a1a'},{name:'Gris',hex:'#8a8f96'},{name:'Azul Eléctrico',hex:'#2b6fd6'}] },
+  { id:'morocco-unisex', cat:'chaqueta', name:'Chaqueta Morocco Unisex', sku:'JLCL', price:14997,
+    img:'https://cdnx.jumpseller.com/chefworks/image/76808891/thumb/760/1013?1779808447',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/76808892/thumb/760/1013?1779808447',
+    zoneOverride: {
+      frente:   { xMin:27, xMax:71 },
+      mangaIzq: { xMin:4,  xMax:26, yMin:15, yMax:52 },
+      mangaDer: { xMin:69, xMax:89, yMin:15, yMax:52 }
+    },
+    colors:[{name:'Negro',hex:'#1a1a1a'},{name:'Blanco',hex:'#f5f5f3'}] },
+  { id:'lemans-mujer', cat:'chaqueta', name:'Chaqueta Le Mans Mujer', sku:'BCW004-WHT', price:27990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/67528769/thumb/760/1013?1782316456',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/67528768/thumb/760/1013?1782316456',
+    zoneOverride: {
+      frente:   { xMin:32, xMax:76 },
+      mangaIzq: { xMin:9,  xMax:31, yMin:15, yMax:47 },
+      mangaDer: { xMin:78, xMax:98, yMin:15, yMax:47 }
+    },
+    colors:[{name:'Blanco',hex:'#f5f5f3'}] },
+  { id:'marbella-mujer', cat:'chaqueta', name:'Chaqueta Marbella Mujer', sku:'CWLJ-WHT', price:43990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/35047087/thumb/760/1013?1779484482',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/35047089/thumb/760/1013?1779484482',
+    zoneOverride: {
+      frente:   { xMin:32, xMax:76 },
+      mangaIzq: { xMin:9,  xMax:31, yMin:15, yMax:47 },
+      mangaDer: { xMin:78, xMax:98, yMin:15, yMax:47 }
+    },
+    colors:[{name:'Blanco',hex:'#f5f5f3'}] },
+
+  // ==================== PECHERAS ====================
+  { id:'pechera-f8', cat:'pechera', name:'Pechera F8 Clásica', sku:'F8', price:14990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/77066527/thumb/760/1013?1779912767',
+    colors:[{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'pechera-stripe', cat:'pechera', name:'Pechera Stripe', sku:'104551230', price:14990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/27031896/thumb/760/1013?1758830050',
+    colors:[{name:'Negro/Blanco',hex:'#2a2a2a'}] },
+  { id:'pechera-chalkstripe', cat:'pechera', name:'Pechera Chalkstripe', sku:'104549530', price:14990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/37473188/thumb/760/1013?1689006797',
+    colors:[{name:'Gris',hex:'#7a7f87'}] },
+  { id:'pechera-portland', cat:'pechera', name:'Pechera Portland', sku:'AB037', price:19990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/76852819/thumb/760/1013?1779318817',
+    colors:[{name:'Caqui',hex:'#a89f6b'}] },
+  { id:'pechera-ridgewood', cat:'pechera', name:'Pechera Ridgewood', sku:'ABN07', price:19990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/67274776/thumb/760/1013?1782419272',
+    colors:[{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'pechera-lockharte', cat:'pechera', name:'Pechera Lockharte', sku:'ABS04-MIL-0', price:25980,
+    img:'https://cdnx.jumpseller.com/chefworks/image/70689986/thumb/760/1013?1781707858',
+    colors:[{name:'Verde Militar',hex:'#5a6b4a'}] },
+  { id:'pechera-presidio', cat:'pechera', name:'Pechera Presidio', sku:'104551240', price:29990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/32201944/thumb/760/1013?1676894987',
+    colors:[{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'pechera-memphis', cat:'pechera', name:'Pechera Memphis', sku:'AB035', price:29990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/67184327/thumb/760/1013?1779321142',
+    colors:[{name:'Café',hex:'#6b4f3a'}] },
+  { id:'pechera-brooklyn', cat:'pechera', name:'Pechera Brooklyn', sku:'104551250', price:29990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/31168029/thumb/760/1013?1758830267',
+    colors:[{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'pechera-corvallis', cat:'pechera', name:'Pechera Corvallis', sku:'ABXX052', price:29990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/67276932/thumb/760/1013?1779321586',
+    colors:[{name:'Gris',hex:'#8a8f96'}] },
+  { id:'pechera-brio', cat:'pechera', name:'Pechera Brio', sku:'ABN05', price:29990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/70686844/thumb/760/1013?1779311056',
+    colors:[{name:'Azul',hex:'#3a5f8a'}] },
+  { id:'pechera-rockford', cat:'pechera', name:'Pechera Rockford', sku:'ABKV053', price:33990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/33581982/thumb/760/1013?1779322164',
+    colors:[{name:'Gris',hex:'#8a8f96'}] },
+  { id:'pechera-dorset', cat:'pechera', name:'Pechera Dorset', sku:'ABAQ054', price:33990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/76895627/thumb/760/1013?1779462903',
+    colors:[{name:'Peltre',hex:'#8f8f8f'}] },
+  { id:'pechera-austin-bib', cat:'pechera', name:'Pechera Austin BIB', sku:'104549520', price:33990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/31168342/thumb/760/1013?1674663831',
+    colors:[{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'pechera-bundel', cat:'pechera', name:'Pechera Tirantes Eco Cuero', sku:'ABN01', price:33990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/76849672/thumb/760/1013?1779314102',
+    colors:[{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'pechera-medford', cat:'pechera', name:'Pechera Medford', sku:'ABN02', price:33990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/76350311/thumb/760/1013?1779308615',
+    colors:[{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'pechera-uptown', cat:'pechera', name:'Pechera Uptown', sku:'ABX01', price:36990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/67911811/thumb/760/1013?1779322618',
+    colors:[{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'pechera-boulder-bib', cat:'pechera', name:'Pechera Boulder BIB', sku:'ABWT051-BNB', price:42990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/35983275/thumb/760/1013?1758829613',
+    colors:[{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'pechera-bragard-taupe', cat:'pechera', name:'Pechera Bragard Taupe', sku:'104551640', price:52990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/67373747/thumb/760/1013?1757334954',
+    colors:[{name:'Taupe',hex:'#8a7d6f'}] },
+  { id:'pechera-bragard-azul', cat:'pechera', name:'Pechera Bragard Azul', sku:'BR0664-NAV-0', price:52990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/71220914/thumb/760/1013?1767097734',
+    colors:[{name:'Azul Marino',hex:'#1b2a4a'}] },
+
+  // ==================== MANDILES ====================
+  { id:'mandil-bistro-negro', cat:'mandil', name:'Mandil Bistró (Negro)', sku:'MACL-BLK', price:9990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/20948403/thumb/760/1013?1649091996',
+    colors:[{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'mandil-bistro-blanco', cat:'mandil', name:'Mandil Bistró (Blanco)', sku:'122A-WHT', price:17990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/76192657/thumb/760/1013?1777485015',
+    colors:[{name:'Blanco',hex:'#f5f5f3'}] },
+  { id:'mandil-basico', cat:'mandil', name:'Mandil Básico', sku:'B3-WHT', price:12990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/76357922/thumb/760/1013?1778090794',
+    colors:[{name:'Blanco',hex:'#f5f5f3'}] },
+  { id:'mandil-clasico', cat:'mandil', name:'Mandil Clásico', sku:'—', price:15990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/78234706/thumb/760/1013?1782487263',
+    colors:[{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'mandil-presidio', cat:'mandil', name:'Mandil Presidio', sku:'AW036-DGY-0', price:27990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/76358169/thumb/760/1013?1778091510',
+    colors:[{name:'Gris Oscuro',hex:'#5a5f66'}] },
+  { id:'mandil-memphis', cat:'mandil', name:'Mandil Memphis', sku:'AW048', price:29990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/76907478/thumb/760/1013?1779485696',
+    colors:[{name:'Café',hex:'#6b4f3a'}] },
+  { id:'mandil-harlem', cat:'mandil', name:'Mandil Harlem', sku:'AW025-BGY', price:31990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/76399038/thumb/760/1013?1778199696',
+    colors:[{name:'Gris Beige',hex:'#a89f8f'}] },
+  { id:'mandil-dorset', cat:'mandil', name:'Mandil Dorset', sku:'AHWAQ014-PEW-0', price:32990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/67262909/thumb/760/1013?1757000540',
+    colors:[{name:'Peltre',hex:'#8f8f8f'}] },
+
+  // ==================== CAMISAS · más vendidas ====================
+  { id:'camisa-cook', cat:'camisa', name:'Camisa Cook Blanca', sku:'BCCS-WHT', price:72990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/114026/thumb/760/1013?1705919499',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/114027/thumb/760/1013?1705919499',
+    colors:[{name:'Blanco',hex:'#f5f5f3'},{name:'Negro',hex:'#1a1a1a'}] },
+  { id:'camisa-dress-blanca', cat:'camisa', name:'Camisa Dress Blanca', sku:'D100-WHT', price:21990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/36593869/thumb/760/1013?1761058986',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/36593867/thumb/760/1013?1761058986',
+    colors:[{name:'Blanco',hex:'#f5f5f3'},{name:'Negro',hex:'#1a1a1a'}] },
+
+  // ==================== POLERAS · más vendida ====================
+  { id:'polera-ayres', cat:'polera', name:'Polera Ayres Crew Unisex', sku:'SHS01', price:26990,
+    img:'https://cdnx.jumpseller.com/chefworks/image/69202296/thumb/760/1013?1778890808',
+    imgBack:'https://cdnx.jumpseller.com/chefworks/image/69202295/thumb/760/1013?1778890808',
+    colors:[{name:'Blanco',hex:'#f5f5f3'},{name:'Negro',hex:'#1a1a1a'}] }
+];
+
+const categories = [
+  {id:'chaqueta', label:'Chaquetas'},
+  {id:'pechera', label:'Pecheras'},
+  {id:'mandil', label:'Mandiles'},
+  {id:'camisa', label:'Camisas'},
+  {id:'polera', label:'Poleras'}
+];
+
+const threadColors = [
+  {name:'Blanco', hex:'#f4f4f2'}, {name:'Negro', hex:'#141414'}, {name:'Rojo', hex:'#c11f2a'},
+  {name:'Azul Marino', hex:'#1b2a4a'}, {name:'Dorado', hex:'#c9a04a'}, {name:'Verde', hex:'#256b3a'}, {name:'Plata', hex:'#b9c0c9'}
+];
+
+// ---------- Estado ----------
+let currentProduct = products[0];
+let currentColor = currentProduct.colors.find(c => c.name === 'Blanco') || currentProduct.colors[0];
+let activeCategory = 'chaqueta';
+let searchQuery = '';
+let activeZone = 'frente';
+let currentView = 'frente'; // 'frente' | 'espalda'
+let previewMode = false;
+
+// bordados[zoneId] = { text: {enabled,text,threadColor,sizeCm,xPct,yPct}, logos: [ {logoDataUrl,sizeCm,xPct,yPct}, ... ] }
+function freshItem(extra){
+  return Object.assign({ enabled:false, threadColor: threadColors[1], sizeCm:5, xPct:50, yPct:38 }, extra||{});
+}
+function freshLogo(extra){
+  return Object.assign({ logoDataUrl:'', sizeCm:5, xPct:50, yPct:38 }, extra||{});
+}
+let bordados = {};
+let lastSpec = null;
+let activeLogoIdx = {}; // por zona: índice del logo que se está editando
+
+function ensureBordadoDefaults(){
+  const zonesForCat = zonesForProduct(currentProduct);
+  Object.keys(zonesForCat).forEach(zid=>{
+    if(!bordados[zid]){
+      const z = zonesForCat[zid];
+      const cx = (z.xMin+z.xMax)/2;
+      bordados[zid] = {
+        text: freshItem({ text:'', fontFamily:"'Poppins', Arial, sans-serif", xPct:cx, yPct: z.yMin + 0.35*(z.yMax-z.yMin) }),
+        logos: []
+      };
+      activeLogoIdx[zid] = -1;
+    }
+  });
+}
+ensureBordadoDefaults();
+bordados['frente'].text.enabled = true;
+bordados['frente'].text.text = 'Restaurant La Mar';
+
+// ---------- DOM refs ----------
+const productsEl = document.getElementById('products');
+const categoryTabsEl = document.getElementById('categoryTabs');
+const productSearchEl = document.getElementById('productSearch');
+productSearchEl.addEventListener('input', ()=>{
+  searchQuery = productSearchEl.value;
+  renderProducts();
+});
+const zoneTabsEl = document.getElementById('zoneTabs');
+const baseImg = document.getElementById('baseImg');
+const viewTabsEl = document.getElementById('viewTabs');
+const backPlaceholder = document.getElementById('backPlaceholder');
+const zoomInBtn = document.getElementById('zoomInBtn');
+const magLens = document.getElementById('magLens');
+const previewStage = document.getElementById('previewStage');
+const mockProduct = document.getElementById('mockProduct');
+const zonesLayer = document.getElementById('zonesLayer');
+const noteBubble = document.getElementById('noteBubble');
+const liveStatus = document.getElementById('liveStatus');
+
+const zoneFields = document.getElementById('zoneFields');
+const textEnabled = document.getElementById('textEnabled');
+const textFieldsInner = document.getElementById('textFieldsInner');
+const brandText = document.getElementById('brandText');
+const threadSwatchesTextEl = document.getElementById('threadSwatchesText');
+const sizeText = document.getElementById('sizeText');
+const sizeLabelText = document.getElementById('sizeLabelText');
+const fontFamilySel = document.getElementById('fontFamily');
+
+const logoList = document.getElementById('logoList');
+const logoEditFields = document.getElementById('logoEditFields');
+const fileInput = document.getElementById('fileInput');
+const btnRemoveLogo = document.getElementById('btnRemoveLogo');
+const sizeLogo = document.getElementById('sizeLogo');
+const sizeLabelLogo = document.getElementById('sizeLabelLogo');
+const qty = document.getElementById('qty');
+const hasMatrix = document.getElementById('hasMatrix');
+const matrixFileInput = document.getElementById('matrixFileInput');
+const matrixFileNameEl = document.getElementById('matrixFileName');
+let matrixFile = null; // { name, dataUrl } — se manda a la hoja igual que un logo, sin comprimir
+
+matrixFileInput.addEventListener('change', e => {
+  const file = e.target.files?.[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    matrixFile = { name: file.name, dataUrl: reader.result };
+    matrixFileNameEl.textContent = '📎 ' + file.name;
+  };
+  reader.readAsDataURL(file);
+});
+const matrixNote = document.getElementById('matrixNote');
+const notesEl = document.getElementById('notes');
+const priceBox = document.getElementById('priceBox');
+const btnPreview = document.getElementById('btnPreview');
+const btnSpec = document.getElementById('btnSpec');
+const validationBanner = document.getElementById('validationBanner');
+const btnReset = document.getElementById('btnReset');
+const confirmPage = document.getElementById('confirmPage');
+const orderNumberBigEl = document.getElementById('orderNumberBig');
+
+function fmtCLP(n){ return '$' + n.toLocaleString('es-CL'); }
+
+// ---------- Encuadre de la foto (fijo: recorta la cabeza y hace zoom al torso) ----------
+function applyFraming(){
+  baseImg.style.transform = `scale(1.2)`;
+  baseImg.style.transformOrigin = `50% 68%`;
+  baseImg.style.objectPosition = `50% 68%`;
+}
+
+// ---------- Lupa: sigue el cursor y muestra zoom al pasar por encima de la prenda ----------
+const MAG_SCALE = 2.3;
+const LENS_SIZE = 150;
+let magActive = false;
+
+zoomInBtn.addEventListener('click', ()=>{
+  magActive = !magActive;
+  zoomInBtn.classList.toggle('active', magActive);
+  zoomInBtn.textContent = magActive ? '🔎' : '🔍';
+  zoomInBtn.title = magActive ? 'Desactivar lupa' : 'Activar lupa (hover)';
+  mockProduct.classList.toggle('magMode', magActive);
+  mockProduct.style.cursor = magActive ? 'none' : '';
+  magLens.style.display = 'none';
+});
+
+mockProduct.addEventListener('mousemove', (e)=>{
+  if(!magActive) return;
+  const rect = mockProduct.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  if(x<0 || y<0 || x>rect.width || y>rect.height){ magLens.style.display = 'none'; return; }
+
+  const stageRect = previewStage.getBoundingClientRect();
+  magLens.style.left = (e.clientX - stageRect.left - LENS_SIZE/2) + 'px';
+  magLens.style.top = (e.clientY - stageRect.top - LENS_SIZE/2) + 'px';
+  magLens.style.display = 'block';
+
+  const clone = mockProduct.cloneNode(true);
+  clone.classList.remove('magMode');
+  clone.style.position = 'absolute';
+  clone.style.width = rect.width + 'px';
+  clone.style.height = rect.height + 'px';
+  clone.style.transform = `scale(${MAG_SCALE})`;
+  clone.style.transformOrigin = '0 0';
+  clone.style.left = (-x*MAG_SCALE + LENS_SIZE/2) + 'px';
+  clone.style.top = (-y*MAG_SCALE + LENS_SIZE/2) + 'px';
+  magLens.innerHTML = '';
+  magLens.appendChild(clone);
+});
+
+mockProduct.addEventListener('mouseleave', ()=>{
+  magLens.style.display = 'none';
+});
+
+// ---------- Categoría / producto ----------
+function renderCategoryTabs(){
+  categoryTabsEl.innerHTML = categories.map(c => `
+    <div class="chip ${c.id===activeCategory?'active':''}" data-cat="${c.id}">${c.label}</div>
+  `).join('');
+}
+categoryTabsEl.addEventListener('click', e=>{
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  activeCategory = chip.dataset.cat;
+  searchQuery = '';
+  productSearchEl.value = '';
+  renderCategoryTabs();
+  const first = products.find(p=>p.cat===activeCategory);
+  if(first) selectProduct(first.id);
+});
+
+function renderProducts(){
+  const q = searchQuery.trim().toLowerCase();
+  const list = q
+    ? products.filter(p => p.name.toLowerCase().includes(q))
+    : products.filter(p => p.cat===activeCategory);
+  productsEl.innerHTML = list.length ? list.map(p => `
+    <div class="prodCard ${p.id===currentProduct.id?'active':''}" data-id="${p.id}">
+      <img src="${p.img}" alt="${p.name}"/>
+      <div class="pname">${p.name}</div>
+    </div>
+  `).join('') : `<div class="small" style="grid-column:1/-1; text-align:center; padding:12px">Sin resultados para "${q}"</div>`;
+}
+productsEl.addEventListener('click', e=>{
+  const card = e.target.closest('.prodCard');
+  if(!card) return;
+  selectProduct(card.dataset.id);
+});
+
+function selectProduct(id){
+  currentProduct = products.find(p=>p.id===id) || products.find(p=>p.cat===activeCategory) || products[0];
+  currentColor = currentProduct.colors[0];
+  baseImg.src = currentProduct.img;
+  currentView = 'frente';
+  ensureBordadoDefaults();
+  const zonesForCat = zonesForProduct(currentProduct);
+  if(!zonesForCat[activeZone] || zonesForCat[activeZone].view !== currentView){
+    activeZone = Object.keys(zonesForCat).find(z => zonesForCat[z].view === currentView) || 'frente';
+  }
+  renderProducts();
+  renderViewTabs();
+  renderZoneTabs();
+  loadZoneFieldsIntoForm();
+  renderPreview();
+  updatePrice();
+}
+
+function renderViewTabs(){
+  const zonesForCat = zonesForProduct(currentProduct);
+  const views = [...new Set(Object.values(zonesForCat).map(z => z.view))]; // ['frente'] o ['frente','espalda']
+  const labels = {frente:'Frente', espalda:'Espalda'};
+  if(views.length <= 1){
+    viewTabsEl.innerHTML = '';
+    viewTabsEl.style.display = 'none';
+    return;
+  }
+  viewTabsEl.style.display = 'flex';
+  viewTabsEl.innerHTML = views.map(v => `
+    <div class="chip ${v===currentView?'active':''}" data-view="${v}">${labels[v] || v}</div>
+  `).join('');
+}
+viewTabsEl.addEventListener('click', e=>{
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  currentView = chip.dataset.view;
+  const zonesForCat = zonesForProduct(currentProduct);
+  if(!zonesForCat[activeZone] || zonesForCat[activeZone].view !== currentView){
+    activeZone = Object.keys(zonesForCat).find(z => zonesForCat[z].view === currentView);
+  }
+  renderViewTabs();
+  renderZoneTabs();
+  loadZoneFieldsIntoForm();
+  renderPreview();
+});
+
+// ---------- Zonas de bordado ----------
+function renderZoneTabs(){
+  const zonesForCat = zonesForProduct(currentProduct);
+  zoneTabsEl.innerHTML = Object.keys(zonesForCat)
+    .filter(zid => zonesForCat[zid].view === currentView)
+    .map(zid => {
+      const zb = bordados[zid];
+      const on = zb && (zb.text.enabled || zb.logos.length > 0);
+      return `<div class="chip ${zid===activeZone?'active':''} ${on?'on':''}" data-zone="${zid}">${zonesForCat[zid].label}</div>`;
+    }).join('');
+}
+zoneTabsEl.addEventListener('click', e=>{
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  activeZone = chip.dataset.zone;
+  renderZoneTabs();
+  loadZoneFieldsIntoForm();
+  renderPreview();
+});
+
+function loadZoneFieldsIntoForm(){
+  const zb = bordados[activeZone];
+  textEnabled.checked = zb.text.enabled;
+  textFieldsInner.style.display = zb.text.enabled ? 'block' : 'none';
+  brandText.value = zb.text.text;
+  fontFamilySel.value = zb.text.fontFamily;
+  sizeText.value = zb.text.sizeCm;
+  sizeLabelText.textContent = zb.text.sizeCm + ' cm';
+
+  renderLogoList();
+  renderThreadSwatches();
+}
+
+function renderLogoList(){
+  const zb = bordados[activeZone];
+  const idx = activeLogoIdx[activeZone];
+  logoList.innerHTML = zb.logos.map((lg,i) => `
+    <div class="logoThumb ${i===idx?'active':''}" data-idx="${i}">
+      <img src="${lg.logoDataUrl}" alt="logo ${i+1}"/>
+      <div class="delMini" data-del="${i}">✕</div>
+    </div>
+  `).join('');
+  const hasSelection = idx >= 0 && zb.logos[idx];
+  logoEditFields.style.display = hasSelection ? 'block' : 'none';
+  if(hasSelection){
+    sizeLogo.value = zb.logos[idx].sizeCm;
+    sizeLabelLogo.textContent = zb.logos[idx].sizeCm + ' cm';
+  }
+}
+
+logoList.addEventListener('click', e=>{
+  const del = e.target.closest('[data-del]');
+  if(del){
+    const i = Number(del.dataset.del);
+    bordados[activeZone].logos.splice(i,1);
+    if(activeLogoIdx[activeZone] === i) activeLogoIdx[activeZone] = -1;
+    else if(activeLogoIdx[activeZone] > i) activeLogoIdx[activeZone]--;
+    renderLogoList(); renderPreview(); updatePrice();
+    return;
+  }
+  const thumb = e.target.closest('.logoThumb');
+  if(thumb){
+    activeLogoIdx[activeZone] = Number(thumb.dataset.idx);
+    renderLogoList(); renderPreview();
+  }
+});
+
+btnRemoveLogo.addEventListener('click', ()=>{
+  const idx = activeLogoIdx[activeZone];
+  if(idx < 0) return;
+  bordados[activeZone].logos.splice(idx,1);
+  activeLogoIdx[activeZone] = -1;
+  renderLogoList(); renderPreview(); updatePrice();
+});
+
+sizeLogo.addEventListener('input', ()=>{
+  const idx = activeLogoIdx[activeZone];
+  if(idx < 0) return;
+  bordados[activeZone].logos[idx].sizeCm = Number(sizeLogo.value);
+  sizeLabelLogo.textContent = sizeLogo.value + ' cm';
+  renderPreview();
+});
+
+textEnabled.addEventListener('change', ()=>{
+  bordados[activeZone].text.enabled = textEnabled.checked;
+  textFieldsInner.style.display = textEnabled.checked ? 'block' : 'none';
+  renderZoneTabs(); renderPreview(); updatePrice();
+});
+
+brandText.addEventListener('input', ()=>{
+  bordados[activeZone].text.text = brandText.value;
+  renderPreview();
+  if(brandText.value.trim()) validationBanner.style.display = 'none';
+});
+fontFamilySel.addEventListener('change', ()=>{
+  bordados[activeZone].text.fontFamily = fontFamilySel.value;
+  renderPreview();
+});
+sizeText.addEventListener('input', ()=>{
+  bordados[activeZone].text.sizeCm = Number(sizeText.value);
+  sizeLabelText.textContent = sizeText.value + ' cm';
+  renderPreview();
+});
+
+// Detecta el color de fondo (esquinas) y lo hace transparente — chroma key simple
+// Reduce el logo a una miniatura chica (para que quepa en una URL) antes de enviarlo
+// a la hoja de cálculo. La versión de alta calidad se sigue usando en el simulador;
+// esta es solo una referencia visual liviana para bodega.
+function compressLogoForSheet(dataUrl, maxSize, callback){
+  const img = new Image();
+  img.onload = () => {
+    let w = img.naturalWidth, h = img.naturalHeight;
+    if(w > h){ if(w > maxSize){ h = Math.round(h*maxSize/w); w = maxSize; } }
+    else { if(h > maxSize){ w = Math.round(w*maxSize/h); h = maxSize; } }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    // Sin fondo: PNG sí soporta transparencia, así que se mantiene el logo real
+    // del cliente (fondo removido). El sistema de "pedacitos" permite mandar
+    // archivos más pesados que antes, así que ya no hace falta sacrificar calidad.
+    ctx.drawImage(img, 0, 0, w, h);
+    callback(canvas.toDataURL('image/png'));
+  };
+  img.onerror = () => callback(null);
+  img.src = dataUrl;
+}
+
+function removeBackground(dataUrl, callback){
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    let imageData;
+    try { imageData = ctx.getImageData(0, 0, canvas.width, canvas.height); }
+    catch(err){ callback(dataUrl); return; } // si falla (CORS, etc.), usar la original sin procesar
+    const data = imageData.data;
+    const w = canvas.width, h = canvas.height;
+    const idx = (x,y) => (y*w + x) * 4;
+    const corners = [idx(0,0), idx(w-1,0), idx(0,h-1), idx(w-1,h-1)];
+    let r=0,g=0,b=0;
+    corners.forEach(i => { r += data[i]; g += data[i+1]; b += data[i+2]; });
+    r/=4; g/=4; b/=4;
+    const threshold = 42;
+    for(let i=0; i<data.length; i+=4){
+      const origR = data[i], origG = data[i+1], origB = data[i+2];
+      const dr = origR-r, dg = origG-g, db = origB-b;
+      const dist = Math.sqrt(dr*dr + dg*dg + db*db);
+
+      let alpha;
+      if(dist < threshold){ alpha = 0; }
+      else if(dist < threshold*1.8){ alpha = Math.min(255, Math.round(255 * (dist - threshold) / (threshold*0.8))); }
+      else { alpha = 255; }
+      data[i+3] = alpha;
+
+      // Descontaminación de color: en píxeles de borde semi-transparentes, el color
+      // original está "mezclado" con el fondo (blanco). Sin esto, al bordar sobre tela
+      // oscura se ve un halo blanco alrededor del logo. Aquí se resta esa mezcla.
+      if(alpha > 5 && alpha < 250){
+        const a = alpha / 255;
+        data[i]   = Math.max(0, Math.min(255, Math.round((origR - (1-a)*r) / a)));
+        data[i+1] = Math.max(0, Math.min(255, Math.round((origG - (1-a)*g) / a)));
+        data[i+2] = Math.max(0, Math.min(255, Math.round((origB - (1-a)*b) / a)));
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+    callback(canvas.toDataURL('image/png'));
+  };
+  img.onerror = () => callback(dataUrl);
+  img.src = dataUrl;
+}
+
+fileInput.addEventListener('change', e=>{
+  const file = e.target.files?.[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const raw = reader.result;
+    const apply = (finalUrl) => {
+      const zb = bordados[activeZone];
+      const z = zonesForProduct(currentProduct)[activeZone];
+      const n = zb.logos.length;
+      // separa un poco cada logo nuevo para que no queden todos exactamente encimados
+      const offset = (n % 3) * 8 - 8;
+      zb.logos.push(freshLogo({
+        logoDataUrl: finalUrl,
+        xPct: Math.min(z.xMax, Math.max(z.xMin, (z.xMin+z.xMax)/2 + offset)),
+        yPct: z.yMin + 0.68*(z.yMax-z.yMin)
+      }));
+      activeLogoIdx[activeZone] = zb.logos.length - 1;
+      renderZoneTabs();
+      renderLogoList();
+      renderPreview();
+      updatePrice();
+    };
+    if(document.getElementById('removeBg').checked){
+      removeBackground(raw, apply);
+    } else {
+      apply(raw);
+    }
+  };
+  reader.readAsDataURL(file);
+});
+
+function renderThreadSwatches(){
+  const zb = bordados[activeZone];
+  threadSwatchesTextEl.innerHTML = threadColors.map(c=>`
+    <div class="swatch ${c.hex===zb.text.threadColor.hex?'active':''}" style="background:${c.hex}" data-hex="${c.hex}" data-name="${c.name}" title="${c.name}"></div>
+  `).join('');
+}
+threadSwatchesTextEl.addEventListener('click', e=>{
+  const sw = e.target.closest('.swatch'); if(!sw) return;
+  bordados[activeZone].text.threadColor = {name:sw.dataset.name, hex:sw.dataset.hex};
+  renderThreadSwatches(); renderPreview();
+});
+
+qty.addEventListener('input', updatePrice);
+const matrixUploadBlock = document.getElementById('matrixUploadBlock');
+hasMatrix.addEventListener('input', updatePrice);
+hasMatrix.addEventListener('change', ()=>{
+  matrixUploadBlock.style.display = hasMatrix.checked ? 'none' : 'block';
+  if(hasMatrix.checked){
+    // si ya tienen la matriz, no hace falta adjuntar nada — se limpia lo que hubiera
+    matrixFile = null;
+    matrixFileInput.value = '';
+    matrixFileNameEl.textContent = '';
+  }
+});
+
+// ---------- Preview: crea/actualiza los overlays y logos por zona ----------
+function clampToZone(zid, x, y){
+  const z = zonesForProduct(currentProduct)[zid];
+  return { x: Math.min(z.xMax, Math.max(z.xMin, x)), y: Math.min(z.yMax, Math.max(z.yMin, y)) };
+}
+
+function renderPreview(){
+  const usingFallback = currentView === 'espalda' && !currentProduct.imgBack;
+  baseImg.src = currentView === 'frente' ? currentProduct.img : (currentProduct.imgBack || currentProduct.img);
+  mockProduct.classList.toggle('usingBackFallback', usingFallback);
+
+  // El color principal de la prenda (el que se ve en la foto) define si el punteado
+  // debe verse blanco (prenda oscura) o del tono oscuro de siempre (prenda clara).
+  // Si el producto tiene la marca "dark" explícita, se respeta esa por sobre el color registrado.
+  const isDarkGarment = currentProduct.dark !== undefined
+    ? currentProduct.dark
+    : /negro|oscuro|carbón|carbon/i.test(currentProduct.colors[0].name);
+  mockProduct.classList.toggle('darkGarment', isDarkGarment);
+
+  const zonesForCat = zonesForProduct(currentProduct);
+  zonesLayer.innerHTML = '';
+  let anySummary = [];
+
+  Object.keys(zonesForCat).filter(zid => zonesForCat[zid].view === currentView).forEach(zid=>{
+    const z = zonesForCat[zid];
+    const zb = bordados[zid];
+
+    // overlay de la zona: solo se muestra en modo edición, y solo si la zona no pidió ocultarlo
+    if(!previewMode && !z.hideOverlay){
+      const ov = document.createElement('div');
+      ov.className = 'zoneOverlay' + (zid===activeZone ? ' editingZone' : '');
+      ov.style.left = z.xMin + '%'; ov.style.top = z.yMin + '%';
+      ov.style.width = (z.xMax - z.xMin) + '%'; ov.style.height = (z.yMax - z.yMin) + '%';
+      const onMark = (zb.text.enabled || zb.logos.length > 0) ? ' ✓' : '';
+      ov.innerHTML = `<div class="zoneLabel">${z.label}${onMark}</div>`;
+      zonesLayer.appendChild(ov);
+    }
+
+    // --- caja de TEXTO ---
+    if(zb.text.enabled){
+      const t = zb.text;
+      const cm = t.sizeCm;
+      const pxWidth = Math.max(10, (cm/60)*400);
+      const fontMain = Math.max(3.5, pxWidth/7);
+      const box = document.createElement('div');
+      box.className = 'logoBox' + (!previewMode && zid===activeZone ? ' editing' : '') + (previewMode ? ' finalRender' : '');
+      box.style.left = t.xPct + '%'; box.style.top = t.yPct + '%';
+      box.style.transform = 'translate(-50%,-50%)';
+      box.style.width = pxWidth + 'px';
+      box.style.color = t.threadColor.hex;
+      box.innerHTML = `
+        <div class="brandName" style="font-size:${fontMain}px; line-height:1.05; font-family:${t.fontFamily}">${t.text || 'Tu Marca'}</div>
+        ${previewMode ? '' : '<div class="resizeHandle" title="Arrastra para cambiar tamaño"></div>'}
+      `;
+      zonesLayer.appendChild(box);
+      if(!previewMode) attachDragAndResize(box, zid, () => bordados[zid].text);
+      anySummary.push(`${z.label} (texto ${cm}cm)`);
+    }
+
+    // --- cajas de LOGOS (una o varias por zona) ---
+    zb.logos.forEach((lg, i) => {
+      const cm = lg.sizeCm;
+      const pxWidth = Math.max(10, (cm/60)*400);
+      const isSelected = zid===activeZone && activeLogoIdx[zid]===i;
+      const box = document.createElement('div');
+      box.className = 'logoBox' + (!previewMode && isSelected ? ' editing' : '') + (previewMode ? ' finalRender' : '');
+      box.style.left = lg.xPct + '%'; box.style.top = lg.yPct + '%';
+      box.style.transform = 'translate(-50%,-50%)';
+      box.style.width = pxWidth + 'px';
+      box.innerHTML = `
+        <img src="${lg.logoDataUrl}" style="display:block" alt="logo ${i+1}"/>
+        ${previewMode ? '' : '<div class="resizeHandle" title="Arrastra para cambiar tamaño"></div>'}
+      `;
+      zonesLayer.appendChild(box);
+      if(!previewMode){
+        attachDragAndResize(box, zid, () => bordados[zid].logos[i]);
+        box.addEventListener('click', ()=>{
+          activeZone = zid; activeLogoIdx[zid] = i;
+          renderZoneTabs(); loadZoneFieldsIntoForm(); renderPreview();
+        });
+      }
+      anySummary.push(`${z.label} (logo ${i+1}: ${cm}cm)`);
+    });
+  });
+
+  document.querySelector('.dragHint').style.display = previewMode ? 'none' : 'block';
+  if(previewMode){
+    noteBubble.textContent = anySummary.length ? '✅ Vista previa · así quedaría bordada la prenda' : 'Sin bordados activos';
+  } else {
+    noteBubble.textContent = anySummary.length ? anySummary.join(' · ') : 'Ninguna zona con bordado activo todavía';
+  }
+  liveStatus.textContent = previewMode ? 'Vista previa' : (anySummary.length ? 'Bordado(s) activo(s)' : 'Edición activa');
+}
+
+btnPreview.addEventListener('click', ()=>{
+  previewMode = !previewMode;
+  btnPreview.textContent = previewMode ? '✏️ Volver a editar' : '👁️ Vista previa';
+  btnPreview.classList.toggle('primary', previewMode);
+  renderPreview();
+});
+
+// ---------- Drag & resize genérico por zona ----------
+function attachDragAndResize(box, zid, itemGetter){
+  let dragging = false, resizing = false;
+  const item = itemGetter;
+
+  function startDrag(e){ dragging = true; box.classList.add('dragging'); e.preventDefault(); e.stopPropagation(); }
+  function moveDrag(e){
+    if(!dragging) return;
+    const point = e.touches ? e.touches[0] : e;
+    const rect = mockProduct.getBoundingClientRect();
+    let xPct = ((point.clientX - rect.left) / rect.width) * 100;
+    let yPct = ((point.clientY - rect.top) / rect.height) * 100;
+    const c = clampToZone(zid, xPct, yPct);
+    item().xPct = c.x; item().yPct = c.y;
+    box.style.left = c.x + '%'; box.style.top = c.y + '%';
+  }
+  function endDrag(){ dragging = false; box.classList.remove('dragging'); }
+
+  box.addEventListener('mousedown', e=>{ if(e.target.classList.contains('resizeHandle')) return; startDrag(e); });
+  document.addEventListener('mousemove', moveDrag);
+  document.addEventListener('mouseup', endDrag);
+  box.addEventListener('touchstart', e=>{ if(e.target.classList.contains('resizeHandle')) return; startDrag(e); }, {passive:false});
+  document.addEventListener('touchmove', moveDrag, {passive:false});
+  document.addEventListener('touchend', endDrag);
+
+  const handle = box.querySelector('.resizeHandle');
+  function startResize(e){ resizing = true; e.stopPropagation(); e.preventDefault(); }
+  function moveResize(e){
+    if(!resizing) return;
+    const point = e.touches ? e.touches[0] : e;
+    const rect = mockProduct.getBoundingClientRect();
+    const it = item();
+    const centerX = rect.left + (it.xPct/100) * rect.width;
+    const centerY = rect.top + (it.yPct/100) * rect.height;
+    const distPx = Math.hypot(point.clientX - centerX, point.clientY - centerY);
+    let cm = (distPx*2/rect.width) * 60;
+    cm = Math.min(10, Math.max(1, cm));
+    it.sizeCm = Math.round(cm*2)/2;
+    if(zid === activeZone){
+      // sincroniza el slider correspondiente si el ítem editado es el que está seleccionado en el panel
+      if(it === bordados[zid].text){ sizeText.value = it.sizeCm; sizeLabelText.textContent = it.sizeCm + ' cm'; }
+      else if(activeLogoIdx[zid] >= 0 && it === bordados[zid].logos[activeLogoIdx[zid]]){ sizeLogo.value = it.sizeCm; sizeLabelLogo.textContent = it.sizeCm + ' cm'; }
+    }
+    renderPreview();
+  }
+  function endResize(){ resizing = false; }
+  handle.addEventListener('mousedown', startResize);
+  document.addEventListener('mousemove', moveResize);
+  document.addEventListener('mouseup', endResize);
+  handle.addEventListener('touchstart', startResize, {passive:false});
+  document.addEventListener('touchmove', moveResize, {passive:false});
+  document.addEventListener('touchend', endResize);
+
+  box.addEventListener('click', ()=>{
+    if(zid !== activeZone){ activeZone = zid; renderZoneTabs(); loadZoneFieldsIntoForm(); renderPreview(); }
+  });
+}
+
+// ---------- Cotización ----------
+function updatePrice(){
+  const q = Math.max(1, Number(qty.value) || 1);
+  const garmentTotal = currentProduct.price * q;
+  let embTotal = 0;
+  const zonesForCat = zonesForProduct(currentProduct);
+  const rows = [];
+  Object.keys(zonesForCat).forEach(zid=>{
+    const zb = bordados[zid];
+    if(zb.text.enabled && zb.text.text.trim()){
+      const cost = 2990*q; embTotal += cost;
+      rows.push({label: zonesForCat[zid].label + ' · texto', cost});
+    }
+    zb.logos.forEach((lg, i) => {
+      const cost = (hasMatrix.checked ? 2990 : 2990+17850) * q; embTotal += cost;
+      rows.push({label: zonesForCat[zid].label + ' · logo ' + (i+1), cost});
+    });
+  });
+  const total = garmentTotal + embTotal;
+
+  matrixNote.textContent = hasMatrix.checked
+    ? 'Se aplicará $2.990 por bordado de logo (matriz existente).'
+    : 'Sin matriz: cada logo nuevo suma $17.850 de digitalización + $2.990. Chef Works confirma por WhatsApp.';
+
+  priceBox.innerHTML = `
+    <div class="priceRow"><span>${currentProduct.name} × ${q}</span><span>${fmtCLP(garmentTotal)}</span></div>
+    ${rows.map(r=>`<div class="priceRow"><span>Bordado ${r.label}</span><span>${fmtCLP(r.cost)}</span></div>`).join('')}
+    <div class="priceRow total"><span>Total estimado</span><span>${fmtCLP(total)}</span></div>
+  `;
+}
+
+// ---------- Spec para bodega ----------
+function specToCSV(spec){
+  const rows = [
+    ['Pedido','Fecha','Prenda','SKU','Color','Cantidad','Precio unitario','Zona','Tipo','Contenido','Tamaño (cm)','Tipografía / Color hilo','Matriz existente','Nota bodega','Plazo']
+  ];
+  const base = [spec.pedido_id, spec.fecha, spec.prenda.nombre, spec.prenda.sku, spec.prenda.color, spec.prenda.cantidad, spec.prenda.precio_unitario];
+  if(spec.bordados.length === 0){
+    rows.push([...base, '', '', '', '', '', spec.logo_matriz_existente?'Sí':'No', spec.nota_bodega||'', spec.plazo_estimado]);
+  } else {
+    spec.bordados.forEach(b=>{
+      rows.push([
+        ...base, b.zona, b.tipo, b.contenido, b.tamano_cm,
+        b.tipo==='texto' ? (b.tipografia + ' / ' + b.color_hilo) : '—',
+        spec.logo_matriz_existente?'Sí':'No', spec.nota_bodega||'', spec.plazo_estimado
+      ]);
+    });
+  }
+  return rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+}
+
+function downloadCSV(spec){
+  const csv = '\uFEFF' + specToCSV(spec); // BOM para que Excel lea bien los acentos
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = spec.pedido_id + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+async function saveToRepository(spec){
+  try{
+    await window.storage.set('cotizaciones:' + spec.pedido_id, JSON.stringify(spec), true);
+    // mantiene un índice de todos los pedidos para poder listarlos después
+    let index = [];
+    try{
+      const existing = await window.storage.get('cotizaciones:index', true);
+      index = existing ? JSON.parse(existing.value) : [];
+    } catch(e){ index = []; }
+    index.push(spec.pedido_id);
+    await window.storage.set('cotizaciones:index', JSON.stringify(index), true);
+  } catch(err){
+    console.error('No se pudo guardar en el repositorio:', err);
+  }
+}
+
+// URL del Web App de Google Apps Script — cada cotización enviada llega a la hoja de cálculo del administrador
+const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxrOp4Ys77jynXkPvHo_LUkISoYNLz18FIL-fEKh0e7w-ftHvVhLaVw699KhlbYmYV1YA/exec';
+
+async function sendToSheet(spec, logosOriginales){
+  try{
+    // 1) Manda la fila con todos los datos (texto, precios, etc.) — esto ya funciona bien.
+    const rowUrl = SHEET_WEBHOOK_URL + '?data=' + encodeURIComponent(JSON.stringify(spec));
+    await loadPixel(rowUrl);
+
+    // 2) Cada logo se manda por separado, en "pedacitos" chicos que sí caben en una URL.
+    //    Apps Script los va juntando del lado de Google hasta armar la imagen completa,
+    //    la guarda en Drive, y actualiza la misma fila con el link.
+    for(const lg of (logosOriginales || [])){
+      const compressed = await new Promise(resolve => compressLogoForSheet(lg.dataUrl, 150, resolve));
+      if(!compressed) continue;
+      await sendFileInChunks(spec.pedido_id, lg.zona, lg.numero, compressed, 'png');
+    }
+
+    // 3) Si el cliente adjuntó un archivo de matriz (.dst, .pes, etc.), se manda igual,
+    //    pero SIN pasar por la compresión de imagen (no es necesariamente una imagen).
+    if(matrixFile){
+      const ext = (matrixFile.name.split('.').pop() || 'dat').toLowerCase();
+      console.log(`[Simulador] Enviando archivo de matriz "${matrixFile.name}"...`);
+      await sendFileInChunks(spec.pedido_id, 'Matriz', 1, matrixFile.dataUrl, ext);
+    }
+  } catch(err){
+    console.error('No se pudo enviar a la hoja de cálculo:', err);
+  }
+}
+
+async function sendFileInChunks(pedidoId, zona, numero, dataUrl, ext){
+  const base64 = dataUrl.split(',')[1];
+  const chunkSize = 1500;
+  const total = Math.ceil(base64.length / chunkSize);
+  console.log(`[Simulador] Enviando "${zona}" en ${total} pedacito(s)...`);
+  for(let i=0; i<total; i++){
+    const chunk = base64.slice(i*chunkSize, (i+1)*chunkSize);
+    const chunkUrl = SHEET_WEBHOOK_URL +
+      '?action=chunk&pedido_id=' + encodeURIComponent(pedidoId) +
+      '&zona=' + encodeURIComponent(zona) + '&numero=' + numero +
+      '&ext=' + encodeURIComponent(ext) +
+      '&idx=' + i + '&total=' + total + '&chunk=' + encodeURIComponent(chunk);
+    await loadPixel(chunkUrl);
+  }
+}
+
+// Dispara una solicitud GET "en silencio" (vía imagen) y espera a que termine antes de seguir,
+// para mandar los pedacitos del logo en el orden correcto, uno por uno.
+function loadPixel(url){
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = resolve;
+    img.onerror = resolve; // la respuesta no es una imagen real, así que "falla" pero igual llegó
+    img.src = url;
+    setTimeout(resolve, 1200); // resguardo por si el navegador nunca dispara load/error
+  });
+}
+
+function openEmailToBodega(spec){
+  const destinatario = 'dcanepa@icbfs.cl';
+  const asunto = `Cotización bordado — ${spec.pedido_id} — ${spec.prenda.nombre}`;
+  const cuerpo =
+    `Pedido: ${spec.pedido_id}%0D%0A` +
+    `Prenda: ${spec.prenda.nombre} (${spec.prenda.sku}) x${spec.prenda.cantidad}%0D%0A` +
+    `Color: ${spec.prenda.color}%0D%0A%0D%0A` +
+    `⚠️ Adjuntar el archivo ${spec.pedido_id}.csv descargado antes de enviar.`;
+  window.location.href = `mailto:${destinatario}?subject=${encodeURIComponent(asunto)}&body=${cuerpo}`;
+}
+
+function validateBordados(){
+  const zonesForCat = zonesForProduct(currentProduct);
+  const errores = [];
+  let hayAlgunBordado = false;
+
+  Object.keys(zonesForCat).forEach(zid=>{
+    const zb = bordados[zid];
+    const nombreZona = zonesForCat[zid].label;
+    if(zb.text.enabled){
+      if(!zb.text.text.trim()){
+        errores.push(`Falta el nombre/marca a bordar en "${nombreZona}".`);
+      } else {
+        hayAlgunBordado = true;
+      }
+    }
+    if(zb.logos.length > 0) hayAlgunBordado = true;
+  });
+
+  if(!hayAlgunBordado && errores.length === 0){
+    errores.push('Agrega al menos un texto o logo antes de enviar el bordado.');
+  }
+  return errores;
+}
+
+btnSpec.addEventListener('click', async ()=>{
+  const errores = validateBordados();
+  if(errores.length > 0){
+    validationBanner.innerHTML = '⚠️ <strong>Faltan datos:</strong><br/>' + errores.join('<br/>');
+    validationBanner.style.display = 'block';
+    validationBanner.scrollIntoView({behavior:'smooth', block:'nearest'});
+    return;
+  }
+  validationBanner.style.display = 'none';
+
+  const zonesForCat = zonesForProduct(currentProduct);
+  const bordadosActivos = [];
+  const logosOriginales = []; // aparte del spec liviano, solo para comprimir y mandar a la hoja
+  let logoGlobalCount = 0; // numera los logos en orden a través de TODAS las zonas, no por zona
+  Object.keys(zonesForCat).forEach(zid=>{
+    const zb = bordados[zid];
+    if(zb.text.enabled && zb.text.text.trim()){
+      bordadosActivos.push({
+        zona: zonesForCat[zid].label, tipo:'texto', contenido: zb.text.text,
+        tipografia: zb.text.fontFamily,
+        color_hilo: zb.text.threadColor.name, color_hilo_hex: zb.text.threadColor.hex,
+        tamano_cm: zb.text.sizeCm, posicion_x_pct: Math.round(zb.text.xPct), posicion_y_pct: Math.round(zb.text.yPct)
+      });
+    }
+    zb.logos.forEach((lg) => {
+      logoGlobalCount++;
+      bordadosActivos.push({
+        zona: zonesForCat[zid].label, tipo:'logo', numero: logoGlobalCount, contenido:'[archivo subido por el cliente, colores propios del logo]',
+        tamano_cm: lg.sizeCm, posicion_x_pct: Math.round(lg.xPct), posicion_y_pct: Math.round(lg.yPct)
+      });
+      logosOriginales.push({ zona: zonesForCat[zid].label, numero: logoGlobalCount, dataUrl: lg.logoDataUrl });
+    });
+  });
+  const qNum = Number(qty.value) || 1;
+  const embTotalCalc = bordadosActivos.reduce((sum, b) => {
+    if(b.tipo === 'texto') return sum + 2990*qNum;
+    return sum + (hasMatrix.checked ? 2990 : 2990+17850) * qNum;
+  }, 0);
+  const totalEstimado = currentProduct.price*qNum + embTotalCalc;
+
+  const spec = {
+    pedido_id: 'CW-' + new Date().toISOString().slice(2,10).replace(/-/g,'') + '-' + Math.random().toString(36).slice(2,6).toUpperCase(),
+    fecha: new Date().toISOString(),
+    prenda: {
+      nombre: currentProduct.name, categoria: currentProduct.cat, sku: currentProduct.sku,
+      color: currentColor.name, color_hex: currentColor.hex,
+      precio_unitario: currentProduct.price, cantidad: qNum
+    },
+    bordados: bordadosActivos,
+    logo_matriz_existente: hasMatrix.checked,
+    nota_bodega: notesEl.value.trim() || null,
+    total_estimado: totalEstimado,
+    plazo_estimado: 'Hasta 15 días hábiles adicionales por bordado',
+    politica: 'Prenda bordada no admite cambio ni devolución',
+    siguiente_paso: 'Enviar a bodega para digitalización de logos nuevos y producción'
+  };
+  orderNumberBigEl.textContent = spec.pedido_id;
+  confirmPage.classList.add('show');
+  lastSpec = spec;
+  await saveToRepository(spec);   // queda guardada en el repositorio del simulador
+  sendToSheet(spec, logosOriginales); // y también llega a tu hoja de cálculo de Google
+});
+
+const btnBackToEditor = document.getElementById('btnBackToEditor');
+
+btnBackToEditor.addEventListener('click', ()=>{
+  confirmPage.classList.remove('show');
+});
+
+btnReset.addEventListener('click', ()=>{
+  bordados = {};
+  activeCategory = 'chaqueta';
+  activeZone = 'frente';
+  previewMode = false;
+  btnPreview.textContent = '👁️ Vista previa';
+  btnPreview.classList.remove('primary');
+  qty.value = 1;
+  hasMatrix.checked = false;
+  matrixFile = null;
+  matrixFileInput.value = '';
+  matrixFileNameEl.textContent = '';
+  notesEl.value = '';
+  renderCategoryTabs();
+  selectProduct(products[0].id);
+  ensureBordadoDefaults();
+  bordados['frente'].text.enabled = true;
+  bordados['frente'].text.text = 'Restaurant La Mar';
+  loadZoneFieldsIntoForm();
+  renderZoneTabs();
+  renderPreview();
+  updatePrice();
+  confirmPage.classList.remove('show');
+});
+
+// ---------- init ----------
+renderCategoryTabs();
+renderProducts();
+renderViewTabs();
+renderZoneTabs();
+loadZoneFieldsIntoForm();
+baseImg.src = currentProduct.img;
+applyFraming();
+renderPreview();
+updatePrice();
+</script>
+</body>
+</html>
