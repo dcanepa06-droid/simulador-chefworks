@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cotizador · Chef Works Chile</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap');
+
+  :root{
+    --white:#ffffff;
+    --black:#111111;
+    --red:#D0021B;
+    --red-dark:#a10115;
+    --gray-line:#e2e2e2;
+    --gray-text:#6b6b6b;
+    --gray-bg:#f7f7f7;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--gray-bg);
+    color:var(--black);
+    font-family:'Libre Franklin',sans-serif;
+    padding:24px 12px 60px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+
+  .app-header{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:16px;flex-wrap:wrap;gap:12px;
+  }
+  .brand-tag{
+    display:flex;align-items:center;gap:10px;
+    font-family:'Space Mono',monospace;font-size:12px;letter-spacing:1px;
+    text-transform:uppercase;color:var(--gray-text);
+  }
+  .brand-tag b{color:var(--red);}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn{
+    font-family:'Libre Franklin',sans-serif;
+    font-size:13px;font-weight:600;
+    padding:9px 16px;border-radius:2px;
+    border:1.5px solid var(--black);
+    background:var(--black);color:var(--white);
+    cursor:pointer;
+  }
+  .btn.secondary{background:var(--white);color:var(--black);}
+  .btn.red{background:var(--red);border-color:var(--red-dark);color:var(--white);}
+  .btn:hover{opacity:0.85;}
+  .btn:active{transform:scale(0.98);}
+
+  .doc{
+    background:var(--white);
+    border:1px solid var(--black);
+    padding:0;
+  }
+  .doc-band{
+    height:6px;
+    background:linear-gradient(90deg, var(--red) 0%, var(--red) 100%);
+  }
+  .doc-inner{padding:30px 34px 26px;}
+
+  .doc-head{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    border-bottom:3px solid var(--black);padding-bottom:18px;margin-bottom:22px;
+    gap:20px;
+  }
+  .logo-block{display:flex;align-items:center;gap:14px;}
+  .logo-block img{height:52px;width:auto;object-fit:contain;}
+  .logo-text{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--gray-text);line-height:1.5;max-width:260px;}
+  .logo-text b{color:var(--black);}
+  .quote-no{text-align:right;font-family:'Space Mono',monospace;}
+  .quote-no .doc-title{
+    font-size:22px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+    color:var(--black);margin-bottom:6px;
+  }
+  .quote-no .doc-title span{color:var(--red);}
+  .quote-no .num-label{font-size:10px;letter-spacing:1.5px;color:var(--gray-text);text-transform:uppercase;}
+  .quote-no input{
+    font-family:'Space Mono',monospace;font-size:19px;font-weight:700;
+    text-align:right;border:none;background:transparent;color:var(--red);
+    width:140px;padding:2px 0;
+  }
+  .quote-no .date-row{font-size:12px;margin-top:6px;color:var(--gray-text);}
+  .quote-no .date-row input{font-size:12px;color:var(--black);width:110px;font-weight:400;}
+
+  .fields{
+    display:grid;grid-template-columns:1fr 1fr;gap:0 32px;margin-bottom:24px;
+  }
+  .field-row{
+    display:grid;grid-template-columns:88px 1fr;align-items:center;
+    border-bottom:1px solid var(--gray-line);padding:7px 0;
+  }
+  .field-row label{
+    font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:1px;
+    color:var(--gray-text);text-transform:uppercase;
+  }
+  .field-row input, .field-row select{
+    border:none;background:transparent;font-family:'Libre Franklin',sans-serif;
+    font-size:13.5px;color:var(--black);padding:4px 2px;width:100%;
+  }
+  .field-row input:focus, .field-row select:focus{outline:none;background:#fbe9eb;}
+
+  .section-label{
+    font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;
+    text-transform:uppercase;color:var(--red);font-weight:700;
+    margin:24px 0 10px;display:flex;align-items:center;gap:10px;
+  }
+  .section-label::after{content:"";flex:1;height:2px;background:var(--black);}
+
+  .code-entry{
+    position:relative;margin-bottom:14px;
+    display:flex;gap:0;border:2px solid var(--black);border-radius:2px;overflow:visible;
+  }
+  .code-entry .code-tag{
+    background:var(--black);color:var(--white);
+    font-family:'Space Mono',monospace;font-size:12px;font-weight:700;
+    letter-spacing:1px;text-transform:uppercase;
+    padding:0 14px;display:flex;align-items:center;white-space:nowrap;
+  }
+  .code-entry input{
+    flex:1;border:none;padding:12px 14px;font-size:15px;font-family:'Space Mono',monospace;
+    background:var(--white);color:var(--black);
+  }
+  .code-entry input:focus{outline:none;background:#fdf3f4;}
+  .code-entry .code-hint{
+    display:flex;align-items:center;padding:0 14px;font-size:11px;color:var(--gray-text);
+    font-family:'Libre Franklin',sans-serif;white-space:nowrap;
+  }
+  .results{
+    position:absolute;left:0;right:0;top:calc(100% + 4px);
+    background:var(--white);border:2px solid var(--black);border-radius:2px;
+    max-height:300px;overflow-y:auto;z-index:20;
+  }
+  .result-item{
+    padding:9px 14px;font-size:13px;cursor:pointer;
+    border-bottom:1px solid var(--gray-line);
+    display:flex;justify-content:space-between;gap:10px;
+  }
+  .result-item:last-child{border-bottom:none;}
+  .result-item:hover{background:#fbe9eb;}
+  .result-item .r-desc{color:var(--black);}
+  .result-item .r-sku{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--gray-text);}
+  .result-item .r-price{font-family:'Space Mono',monospace;font-size:12.5px;font-weight:700;color:var(--red);white-space:nowrap;}
+  .no-results{padding:14px;font-size:13px;color:var(--gray-text);text-align:center;}
+  .not-found-msg{
+    font-family:'Space Mono',monospace;font-size:11.5px;color:var(--red);
+    margin:-6px 0 14px;min-height:14px;
+  }
+
+  table.items{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.items thead th{
+    font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.5px;
+    text-transform:uppercase;color:var(--black);text-align:left;
+    border-bottom:2px solid var(--black);padding:7px 6px;font-weight:700;
+  }
+  table.items thead th.num{text-align:right;}
+  table.items tbody td{
+    padding:9px 6px;border-bottom:1px solid var(--gray-line);vertical-align:middle;
+  }
+  table.items tbody td.num{text-align:right;font-family:'Space Mono',monospace;}
+  table.items tbody tr:hover{background:#fbf5f5;}
+  .cell-desc{max-width:230px;}
+  .cell-desc .sku{font-family:'Space Mono',monospace;font-size:10px;color:var(--gray-text);}
+  .est-tag{
+    font-family:'Libre Franklin',sans-serif;font-size:9.5px;font-weight:700;
+    color:var(--red);text-transform:uppercase;letter-spacing:0.3px;
+  }
+  .qty-input, .dto-input{
+    width:52px;text-align:right;font-family:'Space Mono',monospace;font-size:12.5px;
+    border:1px solid var(--gray-line);border-radius:2px;padding:4px;background:var(--white);
+  }
+  .talla-input{
+    width:56px;text-align:center;font-family:'Space Mono',monospace;font-size:12.5px;
+    text-transform:uppercase;
+    border:1px solid var(--gray-line);border-radius:2px;padding:4px;background:var(--white);
+  }
+  .talla-input:focus{outline:none;border-color:var(--red);}
+  .price-input{
+    width:80px;text-align:right;font-family:'Space Mono',monospace;font-size:12.5px;
+    border:1px solid var(--gray-line);border-radius:2px;padding:4px;background:var(--white);
+  }
+  .qty-input:focus, .dto-input:focus, .price-input:focus{outline:none;border-color:var(--red);}
+  .rm-btn{
+    background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;
+    padding:2px 6px;font-weight:700;
+  }
+  .rm-btn:hover{color:var(--red-dark);}
+  .empty-row td{
+    text-align:center;color:var(--gray-text);font-size:13px;padding:26px 0;
+  }
+
+  .totals{
+    margin-top:18px;margin-left:auto;width:290px;
+    font-family:'Space Mono',monospace;font-size:13px;
+  }
+  .totals .t-row{
+    display:flex;justify-content:space-between;padding:6px 0;
+    border-bottom:1px solid var(--gray-line);
+  }
+  .totals .t-row.grand{
+    border-bottom:none;border-top:3px solid var(--black);
+    margin-top:4px;padding-top:10px;font-size:17px;font-weight:700;color:var(--red);
+  }
+
+  .terms{margin-top:28px;padding-top:16px;border-top:2px solid var(--black);font-size:11.5px;color:var(--gray-text);}
+  .terms-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .terms h4{
+    font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;
+    text-transform:uppercase;color:var(--black);margin:0 0 6px;
+  }
+  .terms p{margin:2px 0;line-height:1.5;}
+  .terms textarea{
+    width:100%;border:1px solid var(--gray-line);background:var(--white);font-family:'Libre Franklin',sans-serif;
+    font-size:11.5px;color:var(--gray-text);padding:8px;border-radius:2px;resize:vertical;line-height:1.5;
+  }
+
+  .footer-note{
+    text-align:center;margin-top:18px;font-size:11px;color:var(--gray-text);
+    font-family:'Space Mono',monospace;letter-spacing:0.5px;
+  }
+
+  @media print{
+    body{background:#fff;padding:0;}
+    .app-header, .code-entry, .rm-btn, .toolbar{display:none !important;}
+    .doc{border:none;}
+    input, select, textarea{border:none !important;background:transparent !important;}
+  }
+
+  @media (max-width:680px){
+    .fields{grid-template-columns:1fr;}
+    .terms-grid{grid-template-columns:1fr;}
+    .doc-head{flex-direction:column;gap:14px;}
+    .quote-no{text-align:left;width:100%;}
+    .quote-no input{text-align:left;}
+    .doc-inner{padding:22px 18px 20px;}
+    .cell-desc{max-width:120px;}
+    .code-entry{flex-wrap:wrap;}
+    .code-entry .code-tag{width:100%;justify-content:center;padding:8px 0;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="app-header">
+    <div class="brand-tag"><b>Chef Works Chile</b> · ICB Food Service SpA · Cotizador</div>
+    <div class="toolbar">
+      <button class="btn secondary" id="btnReset">Nueva cotización</button>
+      <button class="btn secondary" id="btnCopy">Copiar resumen</button>
+      <button class="btn red" id="btnPrint">Imprimir / Guardar PDF</button>
+    </div>
+  </div>
+
+  <div class="doc">
+    <div class="doc-band"></div>
+    <div class="doc-inner">
+
+      <div class="doc-head">
+        <div class="logo-block">
+          <img src="https://images.jumpseller.com/store/chefworks/store/logo/footerLogo.png?1677256838" alt="Chef Works Chile">
+          <div class="logo-text"><b>Importadora y Alimentos ICB Food Service SpA</b><br>RUT 77.965.620-9<br>Uniformes y equipamiento profesional de cocina</div>
+        </div>
+        <div class="quote-no">
+          <div class="doc-title">Cotiza<span>ción</span></div>
+          <div class="num-label">N° cotización</div>
+          <input type="text" id="quoteNo" value="1000733">
+          <div class="date-row">
+            Santiago, <input type="date" id="quoteDate">
+          </div>
+        </div>
+      </div>
+
+      <div class="fields">
+        <div>
+          <div class="field-row"><label>Señores</label><input type="text" id="fCliente" placeholder="Razón social del cliente"></div>
+          <div class="field-row"><label>RUT</label><input type="text" id="fRut" placeholder="76.541.004-5"></div>
+          <div class="field-row"><label>Contacto</label><input type="text" id="fContacto" placeholder="Nombre de contacto"></div>
+          <div class="field-row"><label>Fono</label><input type="text" id="fFono" placeholder="+56 9 ..."></div>
+          <div class="field-row"><label>Email</label><input type="email" id="fEmail" placeholder="contacto@empresa.cl"></div>
+        </div>
+        <div>
+          <div class="field-row"><label>Dirección</label><input type="text" id="fDireccion" placeholder="Calle, número, comuna"></div>
+          <div class="field-row"><label>Pago</label>
+            <select id="fPago">
+              <option>Previa Transferencia</option>
+              <option>Transferencia contra entrega</option>
+              <option>Crédito 30 días</option>
+              <option>Efectivo</option>
+              <option>Webpay / Tarjeta</option>
+            </select>
+          </div>
+          <div class="field-row"><label>Validez</label><input type="text" id="fValidez" value="10 Dias"></div>
+          <div class="field-row"><label>Despacho</label><input type="text" id="fDespacho" placeholder="Chilexpress por pagar / Retiro en tienda"></div>
+          <div class="field-row"><label>Vendedor</label><input type="text" id="fVendedor" placeholder="Nombre ejecutivo/a de ventas"></div>
+        </div>
+      </div>
+
+      <div class="section-label">Ingresar código de producto</div>
+      <div class="code-entry">
+        <div class="code-tag">Código</div>
+        <input type="text" id="searchInput" placeholder="Escribe el código y presiona Enter (ej: F8-NAV-)" autocomplete="off">
+        <div class="code-hint">Enter agrega</div>
+        <div class="results" id="searchResults" style="display:none;"></div>
+      </div>
+      <div class="not-found-msg" id="notFoundMsg"></div>
+
+      <div class="section-label">Detalle</div>
+      <table class="items">
+        <thead>
+          <tr>
+            <th style="width:32%">Producto</th>
+            <th style="width:9%">Talla</th>
+            <th class="num" style="width:7%">Cant.</th>
+            <th class="num" style="width:12%">Valor lista</th>
+            <th class="num" style="width:9%">Dcto %</th>
+            <th class="num" style="width:12%">Valor neto</th>
+            <th class="num" style="width:12%">Total</th>
+            <th style="width:4%"></th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+
+      <div class="totals" id="totalsBox"></div>
+
+      <div class="terms">
+        <div class="terms-grid">
+          <div>
+            <h4>Plazos de entrega</h4>
+            <p>Productos en stock: 5 días hábiles.</p>
+            <p>Confección o sin stock a importar: 45 días.</p>
+            <p>Con bordado — creación de matriz: 5 días hábiles.</p>
+            <p>Con bordado — productos en stock: 15 días hábiles.</p>
+          </div>
+          <div>
+            <h4>Datos de transferencia</h4>
+            <p>Razón social: Importadora y Alimentos ICB Food Service SpA</p>
+            <p>RUT: 77.965.620-9 · Banco Santander</p>
+            <p>Cuenta corriente N°: 165694-5</p>
+            <p>Email pagos: pagoschefworks@icbfs.cl</p>
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <h4>Notas adicionales</h4>
+          <textarea id="fNotas" rows="2" placeholder="Observaciones para esta cotización..."></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer-note">Precios en CLP · Valor lista = precio publicado en chefworks.cl (IVA incluido) · Valor neto = valor lista sin IVA</div>
+</div>
+
+<script>
+const PRODUCTS = [{"sku":"JLCL-","desc":"CHAQUETA CHEF WORKS MOROCCO UNISEX","cat":"CHAQUETA","price":14997.0},{"sku":"SHS01-","desc":"POLERA CHEF WORKS AYRES CREW UNISEX","cat":"POLERA","price":26990.0},{"sku":"BAST-BLK-","desc":"CHAQUETA CHEF WORKS BASTILLE UNISEX","cat":"CHAQUETA","price":27990.0},{"sku":"BCW004-WHT-","desc":"CHAQUETA CHEF WORKS LE MANS MUJER","cat":"CHAQUETA","price":27990.0},{"sku":"WCCW-WHT-","desc":"CHAQUETA CHEF WORKS LE MANS UNISEX","cat":"CHAQUETA","price":28990.0},{"sku":"JLCV-","desc":"CHAQUETA CHEF WORKS MONTREAL UNISEX","cat":"CHAQUETA","price":34990.0},{"sku":"VSSS-","desc":"CHAQUETA CHEF WORKS VALAIS UNISEX","cat":"CHAQUETA","price":37990.0},{"sku":"BCWSZ006-","desc":"CHAQUETA CHEF WORKS SPRINGFIELD MUJER","cat":"CHAQUETA","price":39990.0},{"sku":"BCSZ009-","desc":"CHAQUETA CHEF WORKS SPRINGFIELD UNISEX","cat":"CHAQUETA","price":40990.0},{"sku":"PKWC-","desc":"CHAQUETA CHEF WORKS BORDEAUX UNISEX","cat":"CHAQUETA","price":41990.0},{"sku":"BCWLZ005-","desc":"CHAQUETA CHEF WORKS HARTFORD MUJER","cat":"CHAQUETA","price":42990.0},{"sku":"BCLZ008-","desc":"CHAQUETA CHEF WORKS HARTFORD UNISEX","cat":"CHAQUETA","price":42990.0},{"sku":"CWLJ-WHT-","desc":"CHAQUETA CHEF WORKS MARBELLA MUJER","cat":"CHAQUETA","price":43990.0},{"sku":"LWLJ-","desc":"CHAQUETA CHEF WORKS SOFIA MUJER","cat":"CHAQUETA","price":43990.0},{"sku":"CBC01-","desc":"CHAQUETA CHEF WORKS BOWDEN UNISEX","cat":"CHAQUETA","price":49990.0},{"sku":"COPK-WHT-","desc":"CHAQUETA CHEF WORKS NICE UNISEX","cat":"CHAQUETA","price":25495.0},{"sku":"EWCC-WHT-","desc":"CHAQUETA CHEF WORKS LYON UNISEX","cat":"CHAQUETA","price":50990.0},{"sku":"BCWMC007-","desc":"CHAQUETA CHEF WORKS LANSING MUJER","cat":"CHAQUETA","price":53990.0},{"sku":"BCMC010-","desc":"CHAQUETA CHEF WORKS LANSING UNISEX","cat":"CHAQUETA","price":53990.0},{"sku":"EXWDZ002-","desc":"CHAQUETA CHEF WORKS GRAMERCY MUJER","cat":"CHAQUETA","price":54990.0},{"sku":"EWCB-BLK-","desc":"CHAQUETA CHEF WORKS ZURICH UNISEX","cat":"CHAQUETA","price":27495.0},{"sku":"VSLS-WWH-","desc":"CHAQUETA CHEF WORKS LYSS UNISEX","cat":"CHAQUETA","price":27495.0},{"sku":"EXDZ001-","desc":"CHAQUETA CHEF WORKS GRAMERCY DENIM UNISEX","cat":"CHAQUETA","price":54990.0},{"sku":"VSLS-BGC-","desc":"CHAQUETA CHEF WORKS LYSS UNISEX","cat":"CHAQUETA","price":54990.0},{"sku":"CBZ04W-","desc":"CHAQUETA CHEF WORKS ARCADIA MUJER","cat":"CHAQUETA","price":54990.0},{"sku":"CBZ04-","desc":"CHAQUETA CHEF WORKS ARCADIA UNISEX","cat":"CHAQUETA","price":54990.0},{"sku":"CBZ03-","desc":"CHAQUETA CHEF WORKS VARKALA UNISEX","cat":"CHAQUETA","price":54990.0},{"sku":"CBZ03W-","desc":"CHAQUETA CHEF WORKS VARKALA MUJER","cat":"CHAQUETA","price":54990.0},{"sku":"VECC-WHT-","desc":"CHAQUETA CHEF WORKS EVIAN UNISEX","cat":"CHAQUETA","price":23996.0},{"sku":"CBS01-","desc":"CHAQUETA CHEF WORKS TULUM UNISEX","cat":"CHAQUETA","price":59990.0},{"sku":"CBS01W-","desc":"CHAQUETA CHEF WORKS TULUM MUJER","cat":"CHAQUETA","price":59990.0},{"sku":"CBZ02W-","desc":"CHAQUETA CHEF WORKS NEPAL MUJER","cat":"CHAQUETA","price":60990.0},{"sku":"CBZ02-","desc":"CHAQUETA CHEF WORKS NEPAL UNISEX","cat":"CHAQUETA","price":60990.0},{"sku":"CEZ01-BLK-","desc":"CHAQUETA CHEF WORKS DELANCEY UNISEX","cat":"CHAQUETA","price":64990.0},{"sku":"CEL01-","desc":"CHAQUETON CHEF WORKS UNISEX","cat":"CHAQUETA","price":64990.0},{"sku":"CEL01W-","desc":"CHAQUETON CHEF WORKS MUJER","cat":"CHAQUETA","price":64990.0},{"sku":"WICC-","desc":"CHAQUETA CHEF WORKS LAUSSANE MUJER","cat":"CHAQUETA","price":32995.0},{"sku":"CBN01-","desc":"CHAQUETA CHEF WORKS MOJAVE UNISEX","cat":"CHAQUETA","price":65990.0},{"sku":"CBN01W-","desc":"CHAQUETA CHEF WORKS MOJAVE MUJER","cat":"CHAQUETA","price":65990.0},{"sku":"CBN02-","desc":"CHAQUETA CHEF WORKS MOJAVE MANGA CORTA UNISEX","cat":"CHAQUETA","price":65990.0},{"sku":"SILS-WET-","desc":"CHAQUETA CHEF WORKS AMALFI UNISEX","cat":"CHAQUETA","price":36495.0},{"sku":"CES01-","desc":"CHAQUETA CHEF WORKS TRIBECA UNISEX","cat":"CHAQUETA","price":78990.0},{"sku":"ECCW-WHT-","desc":"CHAQUETA CHEF WORKS MILAN UNISEX","cat":"CHAQUETA","price":37797.0},{"sku":"ECCB-WHT-","desc":"CHAQUETA CHEF WORKS MONTECARLO UNISEX","cat":"CHAQUETA","price":40197.0},{"sku":"CEBP-000-","desc":"PANTALON CHEF WORKS BASICO UNISEX","cat":"PANTALÓN","price":43990.0},{"sku":"NBBP-000-","desc":"PANTALON CHEF WORKS BAGGY UNISEX","cat":"PANTALÓN","price":24743.0},{"sku":"NBCP-000-","desc":"PANTALON CHEF WORKS BAGGY UNISEX","cat":"PANTALÓN","price":24743.0},{"sku":"CVBP-BLK-","desc":"PANTALON CHEF WORKS BAGGY COOL VENT UNISEX","cat":"PANTALÓN","price":35990.0},{"sku":"CPWO-BLK-","desc":"PANTALON CHEF WORKS CARGO UNISEX","cat":"PANTALÓN","price":32990.0},{"sku":"PAMV-BLK-","desc":"PANTALON CHEF WORKS SERVICIO MUJER","cat":"PANTALÓN","price":19990.0},{"sku":"PSER-","desc":"PANTALON CHEF WORKS PREMIUM PROFESSIONAL UNISEX","cat":"PANTALÓN","price":61990.0},{"sku":"PAHV-BLK-","desc":"PANTALON DE SERVICIO CHEF WORKS UNISEX","cat":"PANTALÓN","price":19990.0},{"sku":"BSOL-BLK-","desc":"PANTALON CHEF WORKS BAGGY BETTER BUILT UNISEX","cat":"PANTALÓN","price":49990.0},{"sku":"PBE01-","desc":"PANTALON CHEF WORKS JOGGER UNISEX","cat":"PANTALÓN","price":65990.0},{"sku":"PW004-BLK-","desc":"PANTALON CHEF WORKS COMFI MUJER","cat":"PANTALÓN","price":48990.0},{"sku":"GSBP-000-","desc":"PANTALON CHEF WORKS BAGGY CHALKSTRIPE UNISEX","cat":"PANTALÓN","price":30793.0},{"sku":"PEE01-BLK-","desc":"PANTALON CHEF WORKS GRAMERCY UNISEX","cat":"PANTALÓN","price":30793.0},{"sku":"PEC05W-BLK-","desc":"PANTALON CHEF WORKS CARGO PREMIUM MUJER","cat":"PANTALÓN","price":49990.0},{"sku":"PW005-","desc":"PANTALON CHEF WORKS BAGGY ESSENTIAL MUJER","cat":"PANTALÓN","price":23243.0},{"sku":"PEC05-BLK-","desc":"PANTALON CHEF WORKS CARGO PREMIUM UNISEX","cat":"PANTALÓN","price":49990.0},{"sku":"XNS05-","desc":"SUSPENSOR CHEF WORKS URBAN","cat":"PECHERA","price":7990.0},{"sku":"XNS07-","desc":"SUSPENSOR CHEF WORKS LOCKHARTE","cat":"PECHERA","price":7990.0},{"sku":"MACL-BLK-","desc":"MANDIL CHEF WORKS BISTRO","cat":"MANDIL","price":9990.0},{"sku":"122A-WHT-","desc":"MANDIL CHEF WORKS BISTRO","cat":"MANDIL","price":11693.0},{"sku":"B3-WHT-","desc":"MANDIL CHEF WORKS BASICO","cat":"MANDIL","price":12990.0},{"sku":"104549530-","desc":"PECHERA CHEF WORKS CHALKSTRIPE","cat":"PECHERA","price":14990.0},{"sku":"F8-","desc":"PECHERA CHEF WORKS F8 CLASICA","cat":"PECHERA","price":14990.0},{"sku":"104551230-","desc":"PECHERA CHEF WORKS STRIPE","cat":"PECHERA","price":14990.0},{"sku":"104551260-","desc":"MANDIL CHEF WORKS CLASICO","cat":"MANDIL","price":15990.0},{"sku":"AB037-","desc":"PECHERA CHEF WORKS PORTLAND","cat":"PECHERA","price":19990.0},{"sku":"ABN07-","desc":"PECHERA CHEF WORKS RIDGEWOOD","cat":"PECHERA","price":19990.0},{"sku":"ABS04-MIL-0-","desc":"PECHERA CHEF WORKS LOCKHARTE","cat":"PECHERA","price":25980.0},{"sku":"AW036-DGY-","desc":"MANDIL CHEF WORKS PRESIDIO","cat":"MANDIL","price":13995.0},{"sku":"104551240-","desc":"PECHERA CHEF WORKS PRESIDIO","cat":"PECHERA","price":29990.0},{"sku":"AB035-","desc":"PECHERA CHEF WORKS MEMPHIS","cat":"PECHERA","price":29990.0},{"sku":"104551250-","desc":"PECHERA CHEF WORKS BROOKLYN","cat":"PECHERA","price":29990.0},{"sku":"ABXX052-","desc":"PECHERA CHEF WORKS CORVALLIS","cat":"PECHERA","price":29990.0},{"sku":"AW048-","desc":"MANDIL CHEF WORKS MEMPHIS","cat":"MANDIL","price":29990.0},{"sku":"ABN05-","desc":"PECHERA CHEF WORKS BRIO","cat":"PECHERA","price":29990.0},{"sku":"AW025-BGY-","desc":"MANDIL CHEF WORKS HARLEM","cat":"MANDIL","price":15995.0},{"sku":"AHWAQ014-PEW-0-","desc":"MANDIL CHEF WORKS DORSET","cat":"MANDIL","price":32990.0},{"sku":"ABKV053-","desc":"PECHERA CHEF WORKS ROCKFORD","cat":"PECHERA","price":33990.0},{"sku":"ABAQ054-","desc":"PECHERA CHEF WORKS DORSET","cat":"PECHERA","price":33990.0},{"sku":"104549520-","desc":"PECHERA CHEF WORKS AUSTIN BIB","cat":"PECHERA","price":33990.0},{"sku":"ABN01-","desc":"PECHERA CHEF WORKS TIRANTES INTERCAMBIABLES ECO CUERO","cat":"PECHERA","price":33990.0},{"sku":"ABN02-","desc":"PECHERA CHEF WORKS MEDFORD","cat":"PECHERA","price":33990.0},{"sku":"ABX01-","desc":"PECHERA CHEF WORKS UPTOWN","cat":"PECHERA","price":36990.0},{"sku":"ABWT051-BNB-","desc":"PECHERA CHEF WORKS BOULDER BIB","cat":"PECHERA","price":42990.0},{"sku":"104551640-","desc":"PECHERA BRAGARD","cat":"PECHERA","price":52990.0},{"sku":"BR0664-NAV-","desc":"PECHERA BRAGARD","cat":"PECHERA","price":52990.0},{"sku":"SCBL-BLK-0-","desc":"GORRO CHEF WORKS BANDANA","cat":"GORRO","price":10990.0},{"sku":"HC001-KBL-0-","desc":"JOCKEY CHEF WORKS","cat":"GORRO","price":5495.0},{"sku":"HC002-CHK-0-","desc":"JOCKEY CHEF WORKS","cat":"GORRO","price":5495.0},{"sku":"HC004-BUG-0-","desc":"JOCKEY CHEF WORKS","cat":"GORRO","price":5495.0},{"sku":"BNBK-BLK-0-","desc":"GORRO CHEF WORKS BEANIE","cat":"GORRO","price":9990.0},{"sku":"104551450-","desc":"GORRO CHEF WORKS BEANIE COOL VENT","cat":"GORRO","price":9990.0},{"sku":"DRWH-WHT-0-","desc":"GORRO CHEF WORKS BEANIE","cat":"GORRO","price":9990.0},{"sku":"TOCP-","desc":"GORRO CHEF WORKS TOCA","cat":"GORRO","price":12990.0},{"sku":"CHAT-","desc":"GORRO CHEF WORKS CHAMPINON","cat":"GORRO","price":12990.0},{"sku":"PROMOCP10-","desc":"JOCKEY BEISBOL CHEF WORKS COOL VENT","cat":"GORRO","price":15900.0},{"sku":"1541174-BLKS-M-","desc":"JOCKEY SKATER CHEF WORKS","cat":"GORRO","price":20990.0},{"sku":"108021-BLK-","desc":"ZAPATILLAS SKECHERS UNO SR MUJER","cat":"ZAPATILLA","price":59990.0},{"sku":"108067-BLK-","desc":"ZUECO SKECHERS RIVERBOUND PASAY SR MUJER","cat":"ZUECO","price":42990.0},{"sku":"200092-BLK-","desc":"ZUECO SKECHERS RIVERBOUND SR HOMBRE","cat":"ZUECO","price":42990.0},{"sku":"200254-BLK-","desc":"ZAPATILLAS SKECHERS STIVIG SR HOMBRE","cat":"ZAPATILLA","price":49990.0},{"sku":"108194-BLK-","desc":"ZAPATILLAS SKECHERS JASUL SR PARA MUJER","cat":"ZAPATILLA","price":49990.0},{"sku":"77188-BLK-","desc":"ZAPATILLAS SKECHERS CESSNOCK CARRBORO SR HOMBRE","cat":"ZAPATILLA","price":54990.0},{"sku":"77260-BLK-","desc":"ZAPATILLAS SKECHERS CESSNOCK CARRBORO SR MUJER","cat":"ZAPATILLA","price":54990.0},{"sku":"BIRKI2.0-BLK-","desc":"ZUECO ANTIDESLIZANTE BIRKENSTOCK SUPER BIRKI 2.0","cat":"ZUECO","price":89990.0},{"sku":"BB66-BLK-","desc":"ZUECO SOFT WORKS PUNTERA REFORZADA","cat":"ZUECO","price":44990.0},{"sku":"SOFT-","desc":"ZUECO SOFT WORKS","cat":"ZUECO","price":19990.0},{"sku":"BIRKI-BLK-","desc":"ZUECO ANTIDESLIZANTE BIRKENSTOCK SUPER BIRKI","cat":"ZUECO","price":59990.0},{"sku":"KIT-CUCH-","desc":"KIT CUCHILLOS CHEF WORKS","cat":"SET CUCHILLOS","price":54990.0},{"sku":"HUASCA-","desc":"PANO HUASCA","cat":"PAÑO","price":7990.0},{"sku":"NECC-WHT-0-","desc":"PANUELO CHEF WORKS","cat":"PAÑUELO","price":7990.0},{"sku":"KIT-PAST-0-","desc":"KIT PASTELERIA ESTUDIANTE CHEF WORKS","cat":"SET PASTELERÍA","price":59990.0},{"sku":"KIT-PAST-PREMIUM-","desc":"KIT PASTELERIA PREMIUM ESTUDIANTE CHEF WORKS","cat":"SET PASTELERÍA","price":79990.0},{"sku":"BOLS-PORT-BLK-","desc":"BOLSO CHEF WORKS PORTA CUCHILLOS NEGRO","cat":"BOLSO","price":17990.0},{"sku":"CORB-NEG-","desc":"CORBATA NEGRA","cat":"PAÑUELO","price":7990.0},{"sku":"BCCS-WHT-","desc":"CAMISA CHEF WORKS COOK BLANCA","cat":"CAMISA","price":29196.0},{"sku":"D151-WHT-","desc":"CAMISA CHEF WORKS PREMIUM FORMAL","cat":"CHAQUETA","price":21990.0},{"sku":"W400-LTB-","desc":"BLUSA CHEF WORKS DRESS CELESTE","cat":"BLUSA","price":9990.0},{"sku":"D150-BLK-","desc":"CAMISA CHEF WORKS DRESS","cat":"CAMISA","price":31990.0},{"sku":"C100-WHT-","desc":"CAMISA CHEF WORKS BASICA BLANCA","cat":"CAMISA","price":44990.0},{"sku":"W100-","desc":"BLUSA CHEF WORKS CLASICA","cat":"BLUSA","price":21990.0},{"sku":"D100-","desc":"CAMISA CHEF WORKS DRESS","cat":"CAMISA","price":13596.0},{"sku":"CSMC-BRM-","desc":"CAMISA CHEF WORKS UNIVERSAL CONTRASTE","cat":"CAMISA","price":13996.0},{"sku":"W300-CDA-","desc":"BLUSA CHEF WORKS ONYX","cat":"BLUSA","price":31990.0},{"sku":"VPWO-BLK-","desc":"CHALECO CHEF WORKS ESSENTIAL NEGRO","cat":"CHALECO","price":16497.0},{"sku":"CHHV-BLK-","desc":"CHALECO CHEF WORKS UNISEX NEGRO","cat":"CHALECO","price":11397.0},{"sku":"VPM5-BK3-","desc":"CHALECO CHEF WORKS UNISEX NEGRO","cat":"CHALECO","price":4990.0},{"sku":"CHMV-BLK-","desc":"CHALECO CHEF WORKS PARA MUJER NEGRO","cat":"CHALECO","price":11097.0},{"sku":"D500-WHT-","desc":"CAMISA CHEF WORKS OXFORD","cat":"CAMISA","price":13990.0},{"sku":"WA34-BLK-","desc":"BLUSA CHEF WORKS FINESSE","cat":"BLUSA","price":23990.0},{"sku":"TSWO-BLK-","desc":"BLUSA CHEF WORKS DEFINITY","cat":"BLUSA","price":27990.0},{"sku":"W500-WHT-","desc":"BLUSA CHEF WORKS OXFORD","cat":"BLUSA","price":13990.0},{"sku":"D300-CDA-","desc":"CAMISA CHEF WORKS ONYX","cat":"CAMISA","price":41990.0},{"sku":"KCBL-BLK-","desc":"CAMISA CHEF WORKS UTILITY COOK","cat":"CAMISA","price":14990.0},{"sku":"W150-BLK-","desc":"BLUSA CHEF WORKS BASICA","cat":"BLUSA","price":31990.0},{"sku":"SHC08-WHT-","desc":"CAMISA CHEF WORKS SEERSUCKER","cat":"CAMISA","price":41990.0},{"sku":"SHC08W-BLK-","desc":"BLUSA CHEF WORKS SEERSUCKER","cat":"BLUSA","price":40990.0},{"sku":"SFB01-WHT-","desc":"CAMISA CHEF WORKS FORMEL","cat":"CAMISA","price":48990.0},{"sku":"SFB01W-","desc":"BLUSA CHEF WORKS FORMEL","cat":"BLUSA","price":48990.0},{"sku":"W151-","desc":"BLUSA CHEF WORKS FORMAL PREMIUM","cat":"BLUSA","price":21990.0},{"sku":"WPDS-GRY-","desc":"BLUSA CHEF WORKS PILOT","cat":"BLUSA","price":14990.0},{"sku":"SKS002-","desc":"CAMISA CHEF WORKS DETROIT AZUL","cat":"CAMISA","price":40990.0}];
+
+const PRODUCTS_BY_SKU = {};
+PRODUCTS.forEach(p => { PRODUCTS_BY_SKU[p.sku.toUpperCase()] = p; });
+
+function getFamilyRoot(skuNoTrailingDash){
+  const parts = skuNoTrailingDash.split('-').filter(p => p.length > 0);
+  if(parts.length <= 1) return null;
+  return parts.slice(0, -1).join('-');
+}
+
+const FAMILY_MAP = {};
+PRODUCTS.forEach(p => {
+  const noDash = p.sku.toUpperCase().replace(/-+$/,'');
+  const fam = getFamilyRoot(noDash) || noDash;
+  if(!FAMILY_MAP[fam]){
+    FAMILY_MAP[fam] = { desc: p.desc, cat: p.cat, price: p.price };
+  }
+});
+
+let items = [];
+let itemSeq = 1;
+let currentMatches = [];
+
+const CLP = new Intl.NumberFormat('es-CL', {style:'currency', currency:'CLP', maximumFractionDigits:0});
+function fmt(n){ return CLP.format(Math.round(n||0)); }
+
+document.getElementById('quoteDate').valueAsDate = new Date();
+
+const searchInputEl = document.getElementById('searchInput');
+const resultsBox = document.getElementById('searchResults');
+const notFoundMsg = document.getElementById('notFoundMsg');
+
+const SIZE_TOKEN = /^(XXS|XS|S|M|L|XL|XXL|2XL|3XL|4XL|5XL|6XL|\d{1,3})$/;
+
+function baseSkuLookup(q){
+  if(PRODUCTS_BY_SKU[q]) return PRODUCTS_BY_SKU[q];
+  if(PRODUCTS_BY_SKU[q + '-']) return PRODUCTS_BY_SKU[q + '-'];
+  const noDash = q.replace(/-+$/,'');
+  const match = PRODUCTS.find(p => p.sku.toUpperCase().replace(/-+$/,'') === noDash);
+  return match || null;
+}
+
+function stripSizeSuffix(q){
+  const parts = q.split('-').filter(p => p.length > 0);
+  if(parts.length < 2) return null;
+  const last = parts[parts.length - 1];
+  if(SIZE_TOKEN.test(last)){
+    return parts.slice(0, -1).join('-');
+  }
+  return null;
+}
+
+function extractSizeToken(q){
+  const parts = q.split('-').filter(p => p.length > 0);
+  if(parts.length < 2) return '';
+  const last = parts[parts.length - 1];
+  return SIZE_TOKEN.test(last) ? last : '';
+}
+
+function findExact(query){
+  const q = query.trim().toUpperCase();
+  if(!q) return null;
+  let found = baseSkuLookup(q);
+  if(found) return found;
+  const withoutSize = stripSizeSuffix(q);
+  if(withoutSize){
+    found = baseSkuLookup(withoutSize);
+    if(found) return found;
+  }
+  const qNoSize = (withoutSize || q).replace(/-+$/,'');
+  const fam = getFamilyRoot(qNoSize);
+  if(fam && FAMILY_MAP[fam]){
+    const f = FAMILY_MAP[fam];
+    return {
+      sku: qNoSize + '-',
+      desc: f.desc,
+      cat: f.cat,
+      price: f.price,
+      estimated: true
+    };
+  }
+  return null;
+}
+
+function filterProducts(query){
+  const q = query.trim().toLowerCase();
+  if(!q) return [];
+  let results = PRODUCTS.filter(p =>
+    p.sku.toLowerCase().includes(q) ||
+    p.desc.toLowerCase().includes(q) ||
+    (p.cat && p.cat.toLowerCase().includes(q))
+  );
+  if(results.length === 0){
+    const qUpper = query.trim().toUpperCase();
+    const withoutSize = stripSizeSuffix(qUpper);
+    const qNoSize = (withoutSize || qUpper).replace(/-+$/,'');
+    const fam = getFamilyRoot(qNoSize);
+    if(fam && FAMILY_MAP[fam]){
+      const f = FAMILY_MAP[fam];
+      results = [{ sku: qNoSize + '-', desc: f.desc, cat: f.cat, price: f.price, estimated: true }];
+    } else if(withoutSize){
+      const q2 = withoutSize.toLowerCase();
+      results = PRODUCTS.filter(p => p.sku.toLowerCase().includes(q2));
+    }
+  }
+  return results.slice(0, 30);
+}
+
+searchInputEl.addEventListener('input', (e)=>{
+  notFoundMsg.textContent = '';
+  const q = e.target.value.trim();
+  if(q.length < 1){ resultsBox.style.display='none'; return; }
+  renderResults(filterProducts(q));
+});
+
+searchInputEl.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    const q = searchInputEl.value.trim();
+    if(!q) return;
+    const exact = findExact(q);
+    if(exact){
+      const talla = extractSizeToken(q.toUpperCase());
+      addItem(exact, talla);
+      searchInputEl.value = '';
+      resultsBox.style.display = 'none';
+      notFoundMsg.textContent = exact.estimated
+        ? 'Agregado con precio de la familia (ese color no estaba en la lista maestra). Verifica el valor en la web.'
+        : '';
+      return;
+    }
+    const matches = filterProducts(q);
+    if(matches.length === 1){
+      const talla = extractSizeToken(q.toUpperCase());
+      addItem(matches[0], talla);
+      searchInputEl.value = '';
+      resultsBox.style.display = 'none';
+      notFoundMsg.textContent = '';
+    } else if(matches.length > 1){
+      renderResults(matches);
+    } else {
+      notFoundMsg.textContent = 'Código no encontrado. Revisa el código o busca por nombre.';
+    }
+  }
+});
+
+searchInputEl.addEventListener('focus', (e)=>{
+  if(e.target.value.trim().length > 0) resultsBox.style.display='block';
+});
+
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.code-entry')) resultsBox.style.display='none';
+});
+
+function renderResults(matches){
+  currentMatches = matches;
+  if(matches.length === 0){
+    resultsBox.innerHTML = '<div class="no-results">Sin resultados. Prueba con otro código o palabra.</div>';
+    resultsBox.style.display='block';
+    return;
+  }
+  resultsBox.innerHTML = matches.map((p,i)=>
+    '<div class="result-item" data-idx="'+i+'">' +
+      '<div><div class="r-desc">'+escapeHtml(p.desc)+(p.estimated ? ' <span class="est-tag">precio referencial</span>' : '')+'</div><div class="r-sku">'+escapeHtml(p.sku)+(p.cat ? ' · '+escapeHtml(p.cat) : '')+'</div></div>' +
+      '<div class="r-price">'+fmt(p.price)+'</div>' +
+    '</div>'
+  ).join('');
+  resultsBox.style.display='block';
+  resultsBox.querySelectorAll('.result-item').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const p = currentMatches[parseInt(el.dataset.idx)];
+      const talla = extractSizeToken(searchInputEl.value.trim().toUpperCase());
+      addItem(p, talla);
+      searchInputEl.value='';
+      resultsBox.style.display='none';
+      notFoundMsg.textContent = '';
+      searchInputEl.focus();
+    });
+  });
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function addItem(p, talla){
+  items.push({ id: itemSeq++, sku:p.sku, desc:p.desc, price:p.price, qty:1, dto:0, talla: talla || '', estimated: !!p.estimated });
+  renderItems();
+  searchInputEl.focus();
+}
+
+function removeItem(id){
+  items = items.filter(it => it.id !== id);
+  renderItems();
+}
+
+function updateItem(id, field, value){
+  const it = items.find(x=>x.id===id);
+  if(!it) return;
+  if(field==='qty') it.qty = Math.max(0, parseFloat(value)||0);
+  if(field==='dto') it.dto = Math.min(100, Math.max(0, parseFloat(value)||0));
+  if(field==='price') it.price = Math.max(0, parseFloat(value)||0);
+  if(field==='talla') it.talla = value.trim();
+  renderItems(true);
+}
+
+function renderItems(skipFocusReset){
+  const body = document.getElementById('itemsBody');
+  if(items.length === 0){
+    body.innerHTML = '<tr class="empty-row"><td colspan="8">Ingresa un código arriba para agregar el producto.</td></tr>';
+  } else {
+    body.innerHTML = items.map(it=>{
+      const neto = (it.price / 1.19) * (1 - it.dto/100);
+      const total = neto * it.qty;
+      return '<tr>' +
+        '<td class="cell-desc">'+escapeHtml(it.desc)+'<div class="sku">'+escapeHtml(it.sku)+(it.estimated ? ' <span class="est-tag">precio referencial</span>' : '')+'</div></td>' +
+        '<td><input class="talla-input" type="text" value="'+escapeHtml(it.talla||'')+'" placeholder="-" onchange="updateItem('+it.id+',\'talla\',this.value)"></td>' +
+        '<td class="num"><input class="qty-input" type="number" min="0" step="1" value="'+it.qty+'" onchange="updateItem('+it.id+',\'qty\',this.value)"></td>' +
+        '<td class="num">'+
+          '<input class="price-input" type="number" min="0" step="1" value="'+it.price+'" onchange="updateItem('+it.id+',\'price\',this.value)">'+
+        '</td>' +
+        '<td class="num"><input class="dto-input" type="number" min="0" max="100" step="1" value="'+it.dto+'" onchange="updateItem('+it.id+',\'dto\',this.value)"></td>' +
+        '<td class="num">'+fmt(neto)+'</td>' +
+        '<td class="num">'+fmt(total)+'</td>' +
+        '<td><button class="rm-btn" onclick="removeItem('+it.id+')" title="Quitar">&times;</button></td>' +
+      '</tr>';
+    }).join('');
+  }
+  renderTotals();
+}
+
+function renderTotals(){
+  const subtotal = items.reduce((s,it)=> s + ((it.price/1.19)*(1-it.dto/100))*it.qty, 0);
+  const iva = subtotal * 0.19;
+  const total = subtotal + iva;
+  document.getElementById('totalsBox').innerHTML =
+    '<div class="t-row"><span>Subtotal</span><span>'+fmt(subtotal)+'</span></div>' +
+    '<div class="t-row"><span>IVA (19%)</span><span>'+fmt(iva)+'</span></div>' +
+    '<div class="t-row grand"><span>Total</span><span>'+fmt(total)+'</span></div>';
+}
+
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  if(items.length && !confirm('¿Vaciar el detalle y empezar una cotización nueva?')) return;
+  items = [];
+  document.getElementById('fCliente').value='';
+  document.getElementById('fRut').value='';
+  document.getElementById('fContacto').value='';
+  document.getElementById('fFono').value='';
+  document.getElementById('fEmail').value='';
+  document.getElementById('fDireccion').value='';
+  document.getElementById('fDespacho').value='';
+  document.getElementById('fVendedor').value='';
+  document.getElementById('fNotas').value='';
+  document.getElementById('quoteDate').valueAsDate = new Date();
+  const n = parseInt(document.getElementById('quoteNo').value)||1000732;
+  document.getElementById('quoteNo').value = n+1;
+  renderItems();
+});
+
+document.getElementById('btnPrint').addEventListener('click', ()=> window.print());
+
+document.getElementById('btnCopy').addEventListener('click', ()=>{
+  const subtotal = items.reduce((s,it)=> s + ((it.price/1.19)*(1-it.dto/100))*it.qty, 0);
+  const iva = subtotal*0.19;
+  const total = subtotal+iva;
+  let txt = 'COTIZACIÓN N° '+document.getElementById('quoteNo').value+'\n';
+  txt += 'Cliente: '+(document.getElementById('fCliente').value||'-')+'\n';
+  txt += 'RUT: '+(document.getElementById('fRut').value||'-')+'\n';
+  txt += 'Contacto: '+(document.getElementById('fContacto').value||'-')+'\n\n';
+  items.forEach(it=>{
+    const neto = (it.price/1.19)*(1-it.dto/100);
+    const tallaTxt = it.talla ? ' | Talla: '+it.talla : '';
+    txt += it.sku+' - '+it.desc+tallaTxt+' | Cant: '+it.qty+' | Neto: '+fmt(neto)+' | Total: '+fmt(neto*it.qty)+'\n';
+  });
+  txt += '\nSubtotal: '+fmt(subtotal)+'\nIVA: '+fmt(iva)+'\nTOTAL: '+fmt(total);
+  navigator.clipboard.writeText(txt).then(()=>{
+    alert('Resumen copiado al portapapeles.');
+  }).catch(()=>{
+    prompt('Copia el resumen manualmente:', txt);
+  });
+});
+
+renderItems();
+</script>
+</body>
+</html>
